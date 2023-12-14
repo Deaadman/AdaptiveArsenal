@@ -12,7 +12,7 @@ internal static class BuildInfo
     /// <summary>Version shown in DnSpy</summary>
     public const string AssemblyVersion                 = "1.0.0.0";
     /// <summary>Name used on GUI's, like ModSettings</summary>
-    public const string GUIName                         = "Expanded Weaponry";
+    public const string GUIName                         = "Extended Weaponry";
     /// <summary>The minimum Melon Loader version that your mod requires.</summary>
     public const string MelonLoaderVersion              = "0.6.1";
     #endregion

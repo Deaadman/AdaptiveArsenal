@@ -1,5 +1,4 @@
 ﻿using ExtendedWeaponry.Utilities;
-using ModComponent.API.Components;
 
 namespace ExtendedWeaponry;
 
@@ -10,21 +9,20 @@ public class AmmoItemExtension(IntPtr intPtr) : MonoBehaviour(intPtr)
 
     private void Awake()
     {
-        AmmoItem ammoItem = GetComponent<AmmoItem>();
-        if (ammoItem != null)
-        {
-            if (gameObject.name.Contains("GEAR_RevolverAmmoSingle") || gameObject.name.Contains("GEAR_RifleAmmoSingle") || gameObject.name.Contains("GEAR_RevolverAmmoBox") || gameObject.name.Contains("GEAR_RifleAmmoBox"))
-            {
-                m_BulletType = BulletType.Standard;
-            }
-        }
-
-        ModAmmoComponent modAmmoComponent = GetComponent<ModAmmoComponent>();
-        if (modAmmoComponent != null)
+        GearItem gearItem = GetComponent<GearItem>();
+        if (gearItem != null)
         {
             if (gameObject.name.Contains("GEAR_RifleAmmoSingleAP") || gameObject.name.Contains("GEAR_RifleAmmoBoxAP"))
             {
                 m_BulletType = BulletType.ArmorPiercing;
+            }
+            else if (gameObject.name.Contains("GEAR_RevolverAmmoSingle") || gameObject.name.Contains("GEAR_RifleAmmoSingle") || gameObject.name.Contains("GEAR_RevolverAmmoBox") || gameObject.name.Contains("GEAR_RifleAmmoBox"))
+            {
+                m_BulletType = BulletType.Standard;
+            }
+            else
+            {
+                m_BulletType = BulletType.Unspecified;
             }
         }
     }

@@ -3,25 +3,7 @@
 namespace ExtendedWeaponry;
 
 internal class BulletLogging
-{
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.GetAmmoAvailableForWeapon), new Type[] { typeof(GearItem) })]
-    private static class Testing
-    {
-        private static void Postfix(GearItem weapon, ref int __result)
-        {
-            Logging.Log($"Ammo available for {weapon.name}: {__result}");
-        }
-    }
-
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.GetAmmoAvailableForWeapon), new Type[] { typeof(GunType) })]
-    private static class Testing2
-    {
-        private static void Postfix(GunType gunType, ref int __result)
-        {
-            Logging.Log($"Ammo available for {gunType}: {__result}");
-        }
-    }
-
+{ 
     [HarmonyPatch(typeof(vp_Bullet), nameof(vp_Bullet.SpawnImpactEffects))]
     private static class CalculateBulletData
     {

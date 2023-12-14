@@ -1,5 +1,4 @@
 using ExtendedWeaponry.Utilities;
-using ModComponent.API.Components;
 
 namespace ExtendedWeaponry;
 
@@ -10,100 +9,66 @@ internal sealed class Mod : MelonMod
     {
         private static void Postfix(GearItem __instance)
         {
-            if (__instance.GetComponent<AmmoItem>() != null || __instance.GetComponent<ModAmmoComponent>() != null)
+            if (__instance.GetComponent<AmmoItem>() != null)
             {
                 _ = __instance.gameObject.GetComponent<AmmoItemExtension>() ?? __instance.gameObject.AddComponent<AmmoItemExtension>();
             }
-            if (__instance.GetComponent<GunItem>() != null)
-            {
-                _ = __instance.gameObject.GetComponent<GunItemExtension>() ?? __instance.gameObject.AddComponent<GunItemExtension>();
-            }
         }
     }
 
-    [HarmonyPatch(typeof(GunItem), nameof(GunItem.AddRoundsToClip))]
-    private static class AddRoundsToClipPatch
+    [HarmonyPatch(typeof(Inventory), nameof(Inventory.GetAmmoAvailableForWeapon), new Type[] { typeof(GearItem) })]
+    private static class TestingPatch
     {
-        private static void Postfix(GunItem __instance, int count)
+        private static void Postfix(GearItem weapon, ref int __result, Inventory __instance)
         {
-            GunItemExtension gunItemExtension = __instance.GetComponent<GunItemExtension>();
+            Logging.Log($"Ammo available for {weapon.name}: {__result}");
 
-            if (gunItemExtension == null)
+            int apAmmoCount = 0;
+            int standardAmmoCount = 0;
+
+            for (int i = 0; i < __instance.m_Items.Count; i++)
             {
-                Logging.LogError("GunItemExtension not found on GunItem.");
-                return;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                int clipIndex = __instance.m_Clip.Count - 1 - i;
-
-                AmmoItem ammoItem = GetAmmoItemForRound(__instance, gunItemExtension, i);
-                if (ammoItem != null)
+                GearItem gearItem = __instance.m_Items[i];
+                if (gearItem != null && gearItem.m_AmmoItem && gearItem.m_StackableItem
+                    && gearItem.GetRoundedCondition() != 0
+                    && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType)
                 {
-                    AmmoItemExtension ammoExtension = ammoItem.GetComponent<AmmoItemExtension>();
+                    AmmoItemExtension ammoExtension = gearItem.GetComponent<AmmoItemExtension>();
                     if (ammoExtension != null)
                     {
-                        BulletType bulletType = ammoExtension.m_BulletType;
-                        AmmoManager.SetAmmoType(clipIndex, bulletType);
-                        Logging.Log($"Added {bulletType} ammo to clip at index {clipIndex}.");
-                    }
-                }
-            }
-        }
-    }
+                        if (ammoExtension.m_BulletType == BulletType.ArmorPiercing)
+                        {
+                            apAmmoCount += gearItem.m_StackableItem.m_Units;
+                        }
+                        else if (ammoExtension.m_BulletType == BulletType.Standard)
+                        {
+                            standardAmmoCount += gearItem.m_StackableItem.m_Units;
+                        }
 
-    private static AmmoItem GetAmmoItemForRound(GunItem gunItem, GunItemExtension gunItemExtension, int roundIndex)
-    {
-        if (gunItem != null && roundIndex >= 0 && roundIndex < gunItem.m_Clip.Count)
-        {
-            string selectedAmmoPrefabName = gunItemExtension.SelectedAmmoPrefabName;
-
-            var selectedAmmoPrefab = gunItemExtension.m_AmmoItemPrefabs.FirstOrDefault(p => p.name == selectedAmmoPrefabName);
-            if (selectedAmmoPrefab != null)
-            {
-                var ammoItem = selectedAmmoPrefab.GetComponent<AmmoItem>();
-                if (ammoItem != null)
-                {
-                    Logging.Log($"Selected ammo prefab: {selectedAmmoPrefab.name} for round index {roundIndex}");
-                    var ammoExtension = ammoItem.GetComponent<AmmoItemExtension>();
-                    if (ammoExtension != null)
-                    {
-                        return ammoItem;
+                        Logging.Log($"AmmoItemExtension on {gearItem.name}: m_BulletType = {ammoExtension.m_BulletType}");
                     }
                     else
                     {
-                        Logging.Log($"AmmoItemExtension component not found on GearItem prefab for round at index {roundIndex}.");
+                        Logging.Log($"No AmmoItemExtension found on {gearItem.name}");
                     }
                 }
-                else
-                {
-                    Logging.Log($"AmmoItem component not found on GearItem prefab for round at index {roundIndex}.");
-                }
+            }
+
+            if (apAmmoCount > 0)
+            {
+                __result = apAmmoCount;
+                Logging.Log($"Prioritizing Armor Piercing ammo, Count: {apAmmoCount}");
             }
             else
             {
-                Logging.Log($"Selected ammo prefab not found in m_AmmoItemPrefabs for round at index {roundIndex}.");
+                __result = standardAmmoCount;
+                Logging.Log($"Using Standard ammo, Count: {standardAmmoCount}");
             }
         }
-        return null;
     }
 
     [HarmonyPatch(typeof(GunItem), nameof(GunItem.Fired))]
-    private static class Testing2
+    private static class Testing
     {
-        private static void Prefix(GunItem __instance)
-        {
-            try
-            {
-                int clipIndex = __instance.m_Clip.Count - 1;
-                BulletType bulletType = AmmoManager.GetAmmoType(clipIndex);
-                Logging.Log($"Fired round with {bulletType} ammo from clip index {clipIndex}.");
-            }
-            catch (Exception ex)
-            {
-                Logging.LogError($"Error in FiredPatch Prefix: {ex.Message}");
-            }
-        }
     }
 }

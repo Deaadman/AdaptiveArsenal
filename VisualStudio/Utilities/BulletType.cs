@@ -2,7 +2,8 @@
 
 public enum BulletType
 {
+    Unspecified,
+
     Standard,
-    ArmorPiercing,
-    Unspecified
+    ArmorPiercing
 }
