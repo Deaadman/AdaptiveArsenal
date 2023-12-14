@@ -9,33 +9,17 @@ public class AmmoManager : MonoBehaviour
     internal struct BulletInfo
     {
         public BulletType m_BulletType;
-        public int m_Condition;
     }
 
     internal List<BulletInfo> m_Clip = [];
 
-    internal void AddRoundsToClip(BulletType bulletType, int condition)
+    internal void AddRoundsToClip(BulletType bulletType)
     {
         GunItem gunItem = GetComponent<GunItem>();
         if (gunItem != null && m_Clip.Count < gunItem.m_ClipSize)
         {
-            m_Clip.Add(new BulletInfo { m_BulletType = bulletType, m_Condition = condition });
+            m_Clip.Add(new BulletInfo { m_BulletType = bulletType });
         }
-    }
-
-    internal BulletType FindNextBulletTypeForGun(Il2CppSystem.Collections.Generic.List<GearItem> ammoItems)
-    {
-        foreach (var gearItem in ammoItems)
-        {
-            AmmoItemExtension ammoExtension = gearItem.GetComponent<AmmoItemExtension>();
-            if (ammoExtension != null)
-            {
-                Logging.Log($"Valid ammo found: {gearItem.name} with BulletType = {ammoExtension.m_BulletType}");
-                return ammoExtension.m_BulletType;
-            }
-        }
-        Logging.LogError("No valid ammo found for gun.");
-        return BulletType.Unspecified;
     }
 
     internal static Color GetColorForBulletType(BulletType bulletType)
@@ -48,10 +32,64 @@ public class AmmoManager : MonoBehaviour
         };
     }
 
+    internal BulletType GetNextBulletType()
+    {
+        Inventory inventory = GameManager.GetInventoryComponent();
+        if (inventory == null)
+        {
+            Logging.LogError("Inventory component not found.");
+            return BulletType.Unspecified;
+        }
+
+        GunItem gunItem = GetComponent<GunItem>();
+        if (gunItem == null)
+        {
+            Logging.LogError("GunItem component not found on AmmoManager.");
+            return BulletType.Unspecified;
+        }
+
+        Il2CppSystem.Collections.Generic.List<GearItem> ammoItems = new();
+        foreach (var gearItem in inventory.m_Items)
+        {
+            if (IsValidAmmo(gearItem, gunItem.m_GearItem))
+            {
+                ammoItems.Add(gearItem);
+            }
+        }
+
+        foreach (var gearItem in ammoItems)
+        {
+            AmmoItemExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoItemExtension>();
+            if (ammoExtension != null)
+            {
+                Logging.Log($"Valid ammo found: {gearItem.name} with BulletType = {ammoExtension.m_BulletType}");
+                return ammoExtension.m_BulletType;
+            }
+        }
+
+        Logging.LogError("No valid ammo found for gun.");
+        return BulletType.Unspecified;
+    }
+
     internal bool IsValidAmmo(GearItem gearItem, GearItem weapon)
     {
         bool isValid = gearItem != null && gearItem.m_AmmoItem && gearItem.m_StackableItem && gearItem.GetRoundedCondition() != 0 && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType;
         return isValid;
+    }
+
+    [HideFromIl2Cpp]
+    internal static void PrioritizeBulletType(GearItem gearItem, Dictionary<BulletType, int> bulletTypeCounts)
+    {
+        AmmoItemExtension ammoExtension = gearItem.GetComponent<AmmoItemExtension>();
+        if (ammoExtension != null)
+        {
+            BulletType bulletType = ammoExtension.m_BulletType;
+            if (!bulletTypeCounts.ContainsKey(bulletType))
+            {
+                bulletTypeCounts[bulletType] = 0;
+            }
+            bulletTypeCounts[bulletType] += gearItem.m_StackableItem.m_Units;
+        }
     }
 
     [HideFromIl2Cpp]

@@ -5,7 +5,7 @@ namespace ExtendedWeaponry;
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoItemExtension(IntPtr intPtr) : MonoBehaviour(intPtr)
 {
-    public BulletType m_BulletType;
+    internal BulletType m_BulletType;
 
     private void Awake()
     {
@@ -19,10 +19,6 @@ public class AmmoItemExtension(IntPtr intPtr) : MonoBehaviour(intPtr)
             else if (gameObject.name.Contains("GEAR_RevolverAmmoSingle") || gameObject.name.Contains("GEAR_RifleAmmoSingle") || gameObject.name.Contains("GEAR_RevolverAmmoBox") || gameObject.name.Contains("GEAR_RifleAmmoBox"))
             {
                 m_BulletType = BulletType.Standard;
-            }
-            else
-            {
-                m_BulletType = BulletType.Unspecified;
             }
         }
     }

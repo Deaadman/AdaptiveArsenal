@@ -1,6 +1,6 @@
 ﻿namespace ExtendedWeaponry.Utilities;
 
-public enum BulletType
+internal enum BulletType
 {
     Unspecified,
 
