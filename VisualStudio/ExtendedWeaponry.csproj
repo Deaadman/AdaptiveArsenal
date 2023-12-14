@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- These define the critical project details. Such as the net version, C# language version, null enable and do not generate assembly info (we need a custom one) -->
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<LangVersion>Latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!-- This should point to wherever your games primary EXE is -->
+		<TheLongDarkPath>C:\Program Files (x86)\Steam\steamapps\common\TheLongDark</TheLongDarkPath>
+		<ReleaseFolderPath>E:\The Long Dark\Mods\Maintained\ExtendedWeaponry\Release</ReleaseFolderPath>
+		<FileVersion></FileVersion>
+		<AssemblyVersion></AssemblyVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <WarningLevel>6</WarningLevel>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <WarningLevel>6</WarningLevel>
+	</PropertyGroup>
+
+	<!-- List of used references -->
+	<ItemGroup>
+		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.25.0" />
+		
+		<!-- Uncomment whatever is required for your needs. -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.CraftingRevisions" Version="2.2.1" /> -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.GearSpawner" Version="2.3.1" /> -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.LocalizationUtilities" Version="2.0.0" /> -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.ModComponent" Version="6.2.3" /> -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.ModData" Version="1.5.1" /> -->
+		<!-- <PackageReference Include="STBlade.Modding.TLD.ModSettings" Version="1.9.0" /> -->
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="ModComponent">
+	    <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TheLongDark\Mods\ModComponent.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<!-- Most commonly used using's. Add to this so you dont need to define them in the cs files -->
+	<ItemGroup>
+		<Using Include="System.Reflection" />
+		<Using Include="System.Diagnostics.CodeAnalysis" />
+		<Using Include="Il2Cpp" />
+		<Using Include="HarmonyLib" />
+		<Using Include="MelonLoader" />
+		<Using Include="UnityEngine" />
+		
+		<!-- Uncomment whatever is required for your needs. -->
+		<!-- <Using Include="CraftingRevisions" /> -->
+		<!-- <Using Include="GearSpawner" /> -->
+		<!-- <Using Include="LocalizationUtilities" /> -->
+		<Using Include="ModComponent" />
+		<!-- <Using Include="ModData" /> -->
+		<!-- <Using Include="ModSettings" /> -->
+	</ItemGroup>
+
+	<!-- This is a build event. It will copy your dll to the currently defined TheLongDarkPath's Mods folder -->
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<!-- This copies the mods files to the games mod dir -->
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TheLongDarkPath)/Mods" />
+		<!-- This copies the mods files to a designated release folder. Speeds up finding the dll after a build -->
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleaseFolderPath)" />
+	</Target>
+</Project>
