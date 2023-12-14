@@ -28,8 +28,18 @@ public class AmmoManager : MonoBehaviour
         {
             BulletType.ArmorPiercing => Color.green,
             BulletType.Standard => Color.yellow,
+            BulletType.Unspecified => Color.white,                          // Could use this for the Flare Gun items instead, would just need a way to get the game to run reload normally if the BulletType is Unspecified.
             _ => Color.white,
         };
+    }
+
+    internal BulletType GetCurrentBulletType()
+    {
+        if (m_Clip.Count > 0)
+        {
+            return m_Clip[0].m_BulletType;
+        }
+        return BulletType.Unspecified;
     }
 
     internal BulletType GetNextBulletType()

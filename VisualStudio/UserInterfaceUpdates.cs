@@ -10,22 +10,29 @@ internal class UserInterfaceUpdates
             GunItem? gunItem = GameManager.GetPlayerManagerComponent().m_ItemInHands?.m_GunItem;
             if (gunItem == null) return;
 
-            AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
-            if (ammoManager == null) return;
-
             UISprite[] ammoSprites = __instance.m_ListAmmoSprites;
 
-            for (int i = 0; i < ammoSprites.Length; i++)
+            if (gunItem.name.Contains("GEAR_FlareGun") && ammoSprites.Length > 0)               // Works for now, but doesn't indicate weather a bullet is loaded or not. Always indicates as if there is a bullet in the flare gun.
             {
-                if (i < ammoManager.m_Clip.Count)
+                ammoSprites[0].color = Color.white;
+            }
+            else
+            {
+                AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
+                if (ammoManager == null) return;
+
+                for (int i = 0; i < ammoSprites.Length; i++)
                 {
-                    var bulletInfo = ammoManager.m_Clip[i];
-                    Color color = AmmoManager.GetColorForBulletType(bulletInfo.m_BulletType);
-                    ammoSprites[i].color = color;
-                }
-                else if (i < gunItem.m_ClipSize)
-                {
-                    ammoSprites[i].color = Color.white;
+                    if (i < ammoManager.m_Clip.Count)
+                    {
+                        var bulletInfo = ammoManager.m_Clip[i];
+                        Color color = AmmoManager.GetColorForBulletType(bulletInfo.m_BulletType);
+                        ammoSprites[i].color = color;
+                    }
+                    else if (i < gunItem.m_ClipSize)
+                    {
+                        ammoSprites[i].color = Color.white;
+                    }
                 }
             }
         }

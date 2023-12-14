@@ -3,7 +3,7 @@
 internal class BulletLogging
 {
     [HarmonyPatch(typeof(vp_Bullet), nameof(vp_Bullet.SpawnImpactEffects))]
-    private static class CalculateBulletData
+    private static class LogBulletData
     {
         private static bool Prefix(vp_Bullet __instance, RaycastHit hit)
         {
@@ -41,6 +41,7 @@ internal class BulletLogging
             {
                 GunType.Rifle => WeaponSource.Rifle,
                 GunType.Revolver => WeaponSource.Revolver,
+                GunType.FlareGun => WeaponSource.FlareGun,
                 _ => WeaponSource.Unspecified,
             };
         }
