@@ -1,4 +1,5 @@
 using ExtendedWeaponry.Utilities;
+using Utils = ExtendedWeaponry.Utilities.Utils;
 
 namespace ExtendedWeaponry;
 
@@ -21,54 +22,26 @@ internal sealed class Mod : MelonMod
     {
         private static void Postfix(GearItem weapon, ref int __result, Inventory __instance)
         {
-            Logging.Log($"Ammo available for {weapon.name}: {__result}");
+            if (!Utils.IsWeaponValid(weapon))
+            {
+                Logging.LogError($"Invalid weapon: {weapon.name}");
+                return;
+            }
 
+            Logging.Log($"Ammo available for {weapon.name}: {__result}");
             int apAmmoCount = 0;
             int standardAmmoCount = 0;
 
-            for (int i = 0; i < __instance.m_Items.Count; i++)
+            foreach (var gearItem in __instance.m_Items)
             {
-                GearItem gearItem = __instance.m_Items[i];
-                if (gearItem != null && gearItem.m_AmmoItem && gearItem.m_StackableItem
-                    && gearItem.GetRoundedCondition() != 0
-                    && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType)
+                if (Utils.IsValidAmmo(gearItem, weapon))
                 {
-                    AmmoItemExtension ammoExtension = gearItem.GetComponent<AmmoItemExtension>();
-                    if (ammoExtension != null)
-                    {
-                        if (ammoExtension.m_BulletType == BulletType.ArmorPiercing)
-                        {
-                            apAmmoCount += gearItem.m_StackableItem.m_Units;
-                        }
-                        else if (ammoExtension.m_BulletType == BulletType.Standard)
-                        {
-                            standardAmmoCount += gearItem.m_StackableItem.m_Units;
-                        }
-
-                        Logging.Log($"AmmoItemExtension on {gearItem.name}: m_BulletType = {ammoExtension.m_BulletType}");
-                    }
-                    else
-                    {
-                        Logging.Log($"No AmmoItemExtension found on {gearItem.name}");
-                    }
+                    Utils.UpdateAmmoCounts(gearItem, ref apAmmoCount, ref standardAmmoCount);
                 }
             }
 
-            if (apAmmoCount > 0)
-            {
-                __result = apAmmoCount;
-                Logging.Log($"Prioritizing Armor Piercing ammo, Count: {apAmmoCount}");
-            }
-            else
-            {
-                __result = standardAmmoCount;
-                Logging.Log($"Using Standard ammo, Count: {standardAmmoCount}");
-            }
+            __result = apAmmoCount > 0 ? apAmmoCount : standardAmmoCount;
+            Logging.Log($"Ammo selected for {weapon.name}: AP Count = {apAmmoCount}, Standard Count = {standardAmmoCount}");
         }
-    }
-
-    [HarmonyPatch(typeof(GunItem), nameof(GunItem.Fired))]
-    private static class Testing
-    {
     }
 }
