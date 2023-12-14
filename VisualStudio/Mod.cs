@@ -140,4 +140,20 @@ internal sealed class Mod : MelonMod
             }
         }
     }
+
+    [HarmonyPatch(typeof(GunItem), nameof(GunItem.RemoveNextFromClip))]
+    private static class RemoveNextFromClipPatch
+    {
+        private static void Prefix(GunItem __instance)
+        {
+            GunItemExtension extension = __instance.GetComponent<GunItemExtension>();
+            if (extension != null)
+            {
+                if (extension.RemoveNextFromClip(out GunItemExtension.BulletInfo bulletInfo))
+                {
+                    Logging.Log($"Removed bullet from clip: BulletType = {bulletInfo.m_BulletType}");
+                }
+            }
+        }
+    }
 }
