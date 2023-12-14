@@ -2,7 +2,7 @@
 
 namespace ExtendedWeaponry;
 
-[RegisterTypeInIl2Cpp]
+[RegisterTypeInIl2Cpp(false)]
 public class AmmoItemExtension(IntPtr intPtr) : MonoBehaviour(intPtr)
 {
     public BulletType m_BulletType;

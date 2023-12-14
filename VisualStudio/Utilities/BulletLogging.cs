@@ -1,9 +1,7 @@
-﻿using ExtendedWeaponry.Utilities;
-
-namespace ExtendedWeaponry;
+﻿namespace ExtendedWeaponry.Utilities;
 
 internal class BulletLogging
-{ 
+{
     [HarmonyPatch(typeof(vp_Bullet), nameof(vp_Bullet.SpawnImpactEffects))]
     private static class CalculateBulletData
     {
