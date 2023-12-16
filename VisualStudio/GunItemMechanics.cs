@@ -20,7 +20,7 @@ internal class GunItemMechanics
         }
     }
 
-    [HarmonyPatch(typeof(GunItem), nameof(GunItem.RemoveNextFromClip))]
+    [HarmonyPatch(typeof(GunItem), nameof(GunItem.Fired))]
     private static class RemoveRoundsFromCustomClip
     {
         private static void Prefix(GunItem __instance)
@@ -48,7 +48,7 @@ internal class GunItemMechanics
 
             foreach (var gearItem in __instance.m_Items)
             {
-                if (ammoManager.IsValidAmmo(gearItem, weapon))
+                if (AmmoManager.IsValidAmmo(gearItem, weapon))
                 {
                     AmmoManager.PrioritizeBulletType(gearItem, bulletTypeCounts);
                 }
