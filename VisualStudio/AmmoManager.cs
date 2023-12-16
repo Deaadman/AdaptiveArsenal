@@ -42,6 +42,30 @@ public class AmmoManager : MonoBehaviour
         return BulletType.Unspecified;
     }
 
+    internal static Material? GetMaterialForBulletType(BulletType bulletType)
+    {
+        string? prefabName = GetPrefabNameForBulletType(bulletType);
+        if (prefabName == null)
+        {
+            Logging.LogError($"Prefab name not found for bullet type {bulletType}.");
+            return null;
+        }
+
+        Logging.Log($"Loading materials for bullet type {bulletType}, using prefab {prefabName}");
+
+        Material[]? materials = TextureSwapper.GetMaterialsFromGearItemPrefab(prefabName);
+        if (materials != null && materials.Length > 0)
+        {
+            Logging.Log($"Material found for {bulletType}: {materials[0].name} (Instance)");
+            return materials[0];
+        }
+        else
+        {
+            Logging.LogError($"No materials found for bullet type {bulletType}.");
+            return null;
+        }
+    }
+
     internal BulletType GetNextBulletType()
     {
         Inventory inventory = GameManager.GetInventoryComponent();
@@ -81,7 +105,17 @@ public class AmmoManager : MonoBehaviour
         return BulletType.Unspecified;
     }
 
-    internal bool IsValidAmmo(GearItem gearItem, GearItem weapon)
+    private static string? GetPrefabNameForBulletType(BulletType bulletType)
+    {
+        return bulletType switch
+        {
+            BulletType.ArmorPiercing => "GEAR_RifleAmmoSingleAP",
+            BulletType.Standard => "GEAR_RifleAmmoSingle",
+            _ => null,
+        };
+    }
+
+    internal static bool IsValidAmmo(GearItem gearItem, GearItem weapon)
     {
         bool isValid = gearItem != null && gearItem.m_AmmoItem && gearItem.m_StackableItem && gearItem.GetRoundedCondition() != 0 && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType;
         return isValid;
