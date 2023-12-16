@@ -1,4 +1,6 @@
-﻿namespace ExtendedWeaponry;
+﻿using ExtendedWeaponry.Utilities;
+
+namespace ExtendedWeaponry;
 
 internal class InitializeCustomComponents
 {
@@ -15,17 +17,17 @@ internal class InitializeCustomComponents
             if (__instance.GetComponent<GunItem>() != null && !__instance.name.Contains("GEAR_FlareGun"))
             {
                 _ = __instance.gameObject.GetComponent<AmmoManager>() ?? __instance.gameObject.AddComponent<AmmoManager>();
-                _ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
+                //_ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
             }
         }
     }
 
-    [HarmonyPatch(typeof(FirstPersonWeapon), nameof(FirstPersonWeapon.EnableRenderable))]
-    private static class Testing102
+    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Start))]
+    private static class Testing0000
     {
-        private static void Postfix(FirstPersonWeapon __instance)
+        private static void Postfix(vp_FPSShooter __instance)
         {
-            if (__instance.GetComponent<FirstPersonWeapon>() != null)
+            if (__instance.GetComponent<vp_FPSShooter>() != null)
             {
                 _ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
             }

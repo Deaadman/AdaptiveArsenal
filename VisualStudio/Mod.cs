@@ -9,25 +9,13 @@ internal sealed class Mod : MelonMod
     {
         private static void Postfix(vp_FPSShooter __instance)
         {
-            if (__instance.m_Weapon == null || __instance.m_Weapon.m_GearItem == null)
-            {
-                Logging.LogError("m_Weapon or m_GearItem is null in vp_FPSShooter.");
-                return;
-            }
+            if (__instance.m_Weapon == null || __instance.m_Weapon.m_GearItem == null) return;
 
             AmmoManager ammoManager = __instance.m_Weapon.m_GearItem.GetComponent<AmmoManager>();
-            if (ammoManager == null)
-            {
-                Logging.LogError("AmmoManager component not found on m_GearItem.");
-                return;
-            }
+            if (ammoManager == null) return;
 
             Material? newMaterial = AmmoManager.GetMaterialForBulletType(ammoManager.GetNextBulletType());
-            if (newMaterial == null)
-            {
-                Logging.LogError("Failed to get new material for bullet.");
-                return;
-            }
+            if (newMaterial == null) return;
 
             FirstPersonWeapon firstPersonWeapon = __instance.m_Weapon.m_FirstPersonWeaponShoulder.GetComponent<FirstPersonWeapon>();
             if (firstPersonWeapon != null && firstPersonWeapon.m_Renderable != null)
@@ -39,14 +27,6 @@ internal sealed class Mod : MelonMod
                     TextureSwapper.SwapMaterial(meshesTransform, "mesh_bullet_b", newMaterial);
                     TextureSwapper.SwapMaterial(meshesTransform, "mesh_StripperClipBullets", newMaterial);
                 }
-                else
-                {
-                    Logging.LogError("Meshes GameObject not found in m_Renderable.");
-                }
-            }
-            else
-            {
-                Logging.LogError("FirstPersonWeapon or m_Renderable is null in vp_FPSShooter.");
             }
         }
     }

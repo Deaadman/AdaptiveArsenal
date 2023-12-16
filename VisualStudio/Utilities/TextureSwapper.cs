@@ -5,11 +5,7 @@ internal class TextureSwapper
     internal static Material[]? GetMaterialsFromGearItemPrefab(string gearItemName)
     {
         GearItem gearItemPrefab = GearItem.LoadGearItemPrefab(gearItemName);
-        if (gearItemPrefab == null)
-        {
-            Logging.LogError($"Prefab for GearItem '{gearItemName}' not found.");
-            return null;
-        }
+        if (gearItemPrefab == null) return null;
 
         return GetAllMaterialsInGameObject(gearItemPrefab);
     }
@@ -36,16 +32,7 @@ internal class TextureSwapper
             if (renderer != null)
             {
                 renderer.material = newMaterial;
-                Logging.Log($"Material set for {childName}: {renderer.material.name}");
             }
-            else
-            {
-                Logging.LogError($"{childName} does not have a Renderer component.");
-            }
-        }
-        else
-        {
-            Logging.LogError($"{childName} not found under Meshes.");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ExtendedWeaponry;
+﻿using ExtendedWeaponry.Utilities;
+
+namespace ExtendedWeaponry;
 
 internal class UserInterfaceUpdates
 {
@@ -9,6 +11,12 @@ internal class UserInterfaceUpdates
         {
             GunItem? gunItem = GameManager.GetPlayerManagerComponent().m_ItemInHands?.m_GunItem;
             if (gunItem == null) return;
+
+            //if (__instance.m_LabelAmmoReserve != null)                                        // Should update this label based on which ammo is being prioritized, as right now it always defaults to AP.
+            //{
+            //    int ammoCount = GetPrioritizedAmmoCount(gunItem);
+            //    __instance.m_LabelAmmoReserve.text = ammoCount.ToString();
+            //}
 
             UISprite[] ammoSprites = __instance.m_ListAmmoSprites;
 

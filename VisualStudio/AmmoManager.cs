@@ -45,23 +45,15 @@ public class AmmoManager : MonoBehaviour
     internal static Material? GetMaterialForBulletType(BulletType bulletType)
     {
         string? prefabName = GetPrefabNameForBulletType(bulletType);
-        if (prefabName == null)
-        {
-            Logging.LogError($"Prefab name not found for bullet type {bulletType}.");
-            return null;
-        }
-
-        Logging.Log($"Loading materials for bullet type {bulletType}, using prefab {prefabName}");
+        if (prefabName == null) return null;
 
         Material[]? materials = TextureSwapper.GetMaterialsFromGearItemPrefab(prefabName);
         if (materials != null && materials.Length > 0)
         {
-            Logging.Log($"Material found for {bulletType}: {materials[0].name} (Instance)");
             return materials[0];
         }
         else
         {
-            Logging.LogError($"No materials found for bullet type {bulletType}.");
             return null;
         }
     }
@@ -101,7 +93,6 @@ public class AmmoManager : MonoBehaviour
             }
         }
 
-        Logging.LogError("No valid ammo found for gun.");
         return BulletType.Unspecified;
     }
 
