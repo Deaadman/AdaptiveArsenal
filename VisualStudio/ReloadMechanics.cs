@@ -1,8 +1,9 @@
-﻿using ExtendedWeaponry.Utilities;
+﻿using ExtendedWeaponry.Components;
+using ExtendedWeaponry.Utilities;
 
 namespace ExtendedWeaponry;
 
-internal class GunItemMechanics
+internal class ReloadMechanics
 {
     [HarmonyPatch(typeof(GunItem), nameof(GunItem.AddRoundsToClip))]
     private static class SingleRoundsToCustomClip
@@ -57,6 +58,29 @@ internal class GunItemMechanics
             __result = bulletTypeCounts.TryGetValue(BulletType.ArmorPiercing, out int apCount) && apCount > 0 ? apCount
                       : bulletTypeCounts.TryGetValue(BulletType.Standard, out int standardCount) ? standardCount
                       : 0;
+        }
+    }
+
+    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Reload))]
+    private static class SwapBulletMaterials
+    {
+        private static void Postfix(vp_FPSShooter __instance)
+        {
+            if (__instance.m_Weapon == null || __instance.m_Weapon.m_GearItem == null) return;
+
+            AmmoManager ammoManager = __instance.m_Weapon.m_GearItem.GetComponent<AmmoManager>();
+            if (ammoManager == null) return;
+
+            Material? nextBulletMaterial = AmmoManager.GetMaterialForBulletType(ammoManager.GetNextBulletType());
+            if (nextBulletMaterial == null) return;
+
+            FirstPersonWeapon firstPersonWeapon = __instance.m_Weapon.m_FirstPersonWeaponShoulder.GetComponent<FirstPersonWeapon>();
+            if (firstPersonWeapon == null || firstPersonWeapon.m_Renderable == null) return;
+
+            Transform meshesTransform = firstPersonWeapon.m_Renderable.transform.Find("Meshes");
+            if (meshesTransform == null) return;
+
+            AmmoManager.UpdateBulletMaterials(meshesTransform, ammoManager, nextBulletMaterial);
         }
     }
 

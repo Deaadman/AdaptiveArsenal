@@ -1,7 +1,7 @@
 ﻿using ExtendedWeaponry.Utilities;
 using Il2CppInterop.Runtime.Attributes;
 
-namespace ExtendedWeaponry;
+namespace ExtendedWeaponry.Components;
 
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoManager : MonoBehaviour
@@ -33,13 +33,9 @@ public class AmmoManager : MonoBehaviour
         };
     }
 
-    internal BulletType GetCurrentBulletType()
+    internal int GetLoadedBulletCount()
     {
-        if (m_Clip.Count > 0)
-        {
-            return m_Clip[0].m_BulletType;
-        }
-        return BulletType.Unspecified;
+        return m_Clip.Count;
     }
 
     internal static Material? GetMaterialForBulletType(BulletType bulletType)
@@ -141,5 +137,20 @@ public class AmmoManager : MonoBehaviour
             bulletInfo = new BulletInfo();
             return false;
         }
+    }
+
+    internal static void UpdateBulletMaterials(Transform meshesTransform, AmmoManager ammoManager, Material nextBulletMaterial)
+    {
+        int loadedBullets = ammoManager.GetLoadedBulletCount();
+        if (loadedBullets == 1)
+        {
+            TextureSwapper.SwapMaterial(meshesTransform, "mesh_bullet_a", nextBulletMaterial);
+        }
+        else if (loadedBullets > 1)
+        {
+            TextureSwapper.SwapMaterial(meshesTransform, "mesh_bullet_b", nextBulletMaterial);
+        }
+
+        TextureSwapper.SwapMaterial(meshesTransform, "mesh_StripperClipBullets", nextBulletMaterial);
     }
 }

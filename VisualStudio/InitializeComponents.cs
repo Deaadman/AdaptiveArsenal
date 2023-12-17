@@ -1,8 +1,8 @@
-﻿using ExtendedWeaponry.Utilities;
+﻿using ExtendedWeaponry.Components;
 
 namespace ExtendedWeaponry;
 
-internal class InitializeCustomComponents
+internal class InitializeComponents
 {
     [HarmonyPatch(typeof(GearItem), nameof(GearItem.Awake))]
     private static class ApplyScriptExtensions

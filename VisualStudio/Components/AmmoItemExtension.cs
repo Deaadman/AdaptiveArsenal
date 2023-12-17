@@ -1,9 +1,9 @@
 ﻿using ExtendedWeaponry.Utilities;
 
-namespace ExtendedWeaponry;
+namespace ExtendedWeaponry.Components;
 
 [RegisterTypeInIl2Cpp(false)]
-public class AmmoItemExtension(IntPtr intPtr) : MonoBehaviour(intPtr)
+public class AmmoItemExtension : MonoBehaviour
 {
     internal BulletType m_BulletType;
 

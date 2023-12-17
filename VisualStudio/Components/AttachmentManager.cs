@@ -75,12 +75,12 @@ public class AttachmentManager : MonoBehaviour
         Vector3 worldPosition = referenceTransform.position;
         Quaternion worldRotation = referenceTransform.rotation;
 
-        Logging.Log($"Reference Position: {worldPosition}, Reference Rotation: {worldRotation}");
+        //Logging.Log($"Reference Position: {worldPosition}, Reference Rotation: {worldRotation}");
 
         scopeInstance.transform.position = worldPosition;
         scopeInstance.transform.rotation = worldRotation;
 
-        Logging.Log("Scope position and rotation updated.");
+        //Logging.Log("Scope position and rotation updated.");
 
         Debug.DrawLine(worldPosition, worldPosition + worldRotation * Vector3.forward * 2.0f, Color.red);
         Debug.DrawLine(worldPosition, worldPosition + worldRotation * Vector3.up * 2.0f, Color.green);

@@ -1,4 +1,5 @@
-﻿using ExtendedWeaponry.Utilities;
+﻿using ExtendedWeaponry.Components;
+using ExtendedWeaponry.Utilities;
 
 namespace ExtendedWeaponry;
 
