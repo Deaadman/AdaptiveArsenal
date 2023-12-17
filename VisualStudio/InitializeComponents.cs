@@ -22,15 +22,15 @@ internal class InitializeComponents
         }
     }
 
-    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Start))]
-    private static class Testing0000
-    {
-        private static void Postfix(vp_FPSShooter __instance)
-        {
-            if (__instance.GetComponent<vp_FPSShooter>() != null)
-            {
-                _ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
-            }
-        }
-    }
+    //[HarmonyPatch(typeof(vp_FPSWeapon), nameof(vp_FPSWeapon.Start))]
+    //private static class Testing102
+    //{
+    //    private static void Postfix(vp_FPSWeapon __instance)
+    //    {
+    //        if (__instance.GetComponent<vp_FPSWeapon>() != null)
+    //        {
+    //            _ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
+    //        }
+    //    }
+    //}
 }

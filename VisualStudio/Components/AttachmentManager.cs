@@ -1,88 +1,50 @@
-﻿using ExtendedWeaponry.Utilities;
+﻿//using ExtendedWeaponry.Utilities;
+//using UnityEngine.AddressableAssets;
 
-namespace ExtendedWeaponry;
+//namespace ExtendedWeaponry;
 
-[RegisterTypeInIl2Cpp(false)]
-public class AttachmentManager : MonoBehaviour
-{
-    private GameObject scopeInstance;
-    private Transform referenceTransform; // Transform to align the scope with
+//[RegisterTypeInIl2Cpp(false)]
+//public class AttachmentManager : MonoBehaviour
+//{
+//    private void Awake()
+//    {
+//        if (GetComponent<GunItem>() != null)
+//        {
+//            InitializeForGunItem();
+//        }
+//        else if (GetComponent<vp_FPSWeapon>() != null)
+//        {
+//            InitializeForFirstPersonWeapon();
+//        }
+//    }
 
-    private void Awake()
-    {
-        GearItem scopePrefab = GearItem.LoadGearItemPrefab("GEAR_Scope");
-        if (scopePrefab == null)
-        {
-            Logging.LogError("Scope prefab could not be loaded.");
-            return;
-        }
+//    private static void InitializeForGunItem()
+//    {
+//        GameObject scopePrefab = Addressables.LoadAssetAsync<GameObject>("GEAR_Scope").WaitForCompletion();
+//        if (scopePrefab == null) return;
 
-        scopeInstance = Instantiate(scopePrefab.gameObject);
-        Logging.Log("Scope instance created.");
-    }
+//        Instantiate(scopePrefab.gameObject);
+//    }
 
-    private void Start()
-    {
-        vp_FPSShooter vpfps = GetComponent<vp_FPSShooter>();
-        if (vpfps == null)
-        {
-            Logging.LogWarning("vp_FPSWeapon component not found on the GameObject.");
-            return;
-        }
+//    private void InitializeForFirstPersonWeapon()
+//    {
+//        vp_FPSWeapon vpfps = GetComponent<vp_FPSWeapon>();
+//        if (vpfps == null) return;
 
-        FirstPersonWeapon firstPersonWeapon = vpfps.m_Weapon.m_FirstPersonWeaponShoulder.GetComponent<FirstPersonWeapon>();
-        if (firstPersonWeapon == null)
-        {
-            Logging.LogWarning("FirstPersonWeapon component not found on the GameObject.");
-            return;
-        }
+//        FirstPersonWeapon fpw = vpfps.m_FirstPersonWeaponShoulder;
+//        if (fpw == null || fpw.m_Renderable == null) return;
 
-        if (firstPersonWeapon.m_Renderable == null)
-        {
-            Logging.LogError("FirstPersonWeapon's m_Renderable is null.");
-            return;
-        }
+//        Transform meshesTransform = fpw.m_Renderable.transform.Find("Meshes");
+//        if (meshesTransform == null) return;
 
-        referenceTransform = firstPersonWeapon.m_Renderable.transform.Find("Meshes");
-        if (referenceTransform == null)
-        {
-            Logging.LogError("Reference transform 'Meshes' not found on FirstPersonWeapon's m_Renderable.");
-            return;
-        }
+//        GameObject scopePrefab = Addressables.LoadAssetAsync<GameObject>("GEAR_Scope").WaitForCompletion();
+//        if (scopePrefab != null)
+//        {
+//            //PlayerAnimation.SetLayerOnObjectRecursively(scopePrefab, 23);
+//            GameObject instantiatedScope = Instantiate(scopePrefab.gameObject, meshesTransform);
+//            instantiatedScope.transform.localPosition = new Vector3(0, 0.135f, 0.1f);
 
-        Logging.Log("Reference transform for scope alignment set.");
-    }
-
-    private void Update()
-    {
-        if (scopeInstance == null)
-        {
-            Logging.LogWarning("Scope instance is null in Update.");
-            return;
-        }
-
-        if (referenceTransform == null)
-        {
-            Logging.LogWarning("Reference transform is null in Update.");
-            return;
-        }
-
-        UpdateScopePosition();
-    }
-
-    private void UpdateScopePosition()
-    {
-        Vector3 worldPosition = referenceTransform.position;
-        Quaternion worldRotation = referenceTransform.rotation;
-
-        //Logging.Log($"Reference Position: {worldPosition}, Reference Rotation: {worldRotation}");
-
-        scopeInstance.transform.position = worldPosition;
-        scopeInstance.transform.rotation = worldRotation;
-
-        //Logging.Log("Scope position and rotation updated.");
-
-        Debug.DrawLine(worldPosition, worldPosition + worldRotation * Vector3.forward * 2.0f, Color.red);
-        Debug.DrawLine(worldPosition, worldPosition + worldRotation * Vector3.up * 2.0f, Color.green);
-    }
-}
+//            Logging.Log("Scope prefab instantiated directly under Meshes with adjusted local position.");
+//        }
+//    }
+//}
