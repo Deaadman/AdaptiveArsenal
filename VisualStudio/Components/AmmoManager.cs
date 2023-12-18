@@ -27,6 +27,42 @@ public class AmmoManager : MonoBehaviour
         }
     }
 
+    internal static string FormatBulletTypeName(BulletType bulletType)
+    {
+        return bulletType switch
+        {
+            BulletType.ArmorPiercing => "Armor Piercing",
+            BulletType.Standard => "Standard",
+            _ => bulletType.ToString(),
+        };
+    }
+
+    internal static int GetBulletCountInInventory(BulletType bulletType, GunItem gunItem)
+    {
+        Inventory inventory = GameManager.GetInventoryComponent();
+        if (inventory == null)
+        {
+            Logging.LogError("Inventory component not found.");
+            return 0;
+        }
+
+        int count = 0;
+        foreach (var gearItemObject in inventory.m_Items)
+        {
+            GearItem gearItem = gearItemObject;
+            if (gearItem != null && AmmoManager.IsValidAmmo(gearItem, gunItem.m_GearItem))
+            {
+                AmmoExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoExtension>();
+                if (ammoExtension != null && ammoExtension.m_BulletType == bulletType)
+                {
+                    count += gearItem.m_StackableItem.m_Units;
+                }
+            }
+        }
+
+        return count;
+    }
+
     internal static Color GetColorForBulletType(BulletType bulletType)
     {
         return bulletType switch
@@ -85,10 +121,9 @@ public class AmmoManager : MonoBehaviour
 
         foreach (var gearItem in ammoItems)
         {
-            AmmoItemExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoItemExtension>();
+            AmmoExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoExtension>();
             if (ammoExtension != null)
             {
-                Logging.Log($"Valid ammo found: {gearItem.name} with BulletType = {ammoExtension.m_BulletType}");
                 return ammoExtension.m_BulletType;
             }
         }
@@ -117,7 +152,7 @@ public class AmmoManager : MonoBehaviour
     [HideFromIl2Cpp]
     internal static void PrioritizeBulletType(GearItem gearItem, Dictionary<BulletType, int> bulletTypeCounts)
     {
-        AmmoItemExtension ammoExtension = gearItem.GetComponent<AmmoItemExtension>();
+        AmmoExtension ammoExtension = gearItem.GetComponent<AmmoExtension>();
         if (ammoExtension != null)
         {
             BulletType bulletType = ammoExtension.m_BulletType;
@@ -145,7 +180,7 @@ public class AmmoManager : MonoBehaviour
         }
     }
 
-    internal static void UpdateAmmoSprites(GunItem gunItem, UISprite[] ammoSprites)
+    internal static void UpdateAmmoSprites(GunItem gunItem, UISprite[] ammoSprites)         // There is the issue again with the flare gun ammo sprite copying the last colour of the sprite loaded from other weapons.
     {
         if (gunItem.name.Contains("GEAR_FlareGun") && ammoSprites.Length > 0)
         {

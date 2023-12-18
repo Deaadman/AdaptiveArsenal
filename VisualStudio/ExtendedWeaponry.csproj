@@ -26,6 +26,14 @@
 	  <WarningLevel>6</WarningLevel>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <None Remove="Resources\ExtendedWeaponryAssetBundle" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\ExtendedWeaponryAssetBundle" />
+	</ItemGroup>
+
 	<!-- List of used references -->
 	<ItemGroup>
 		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.25.0" />

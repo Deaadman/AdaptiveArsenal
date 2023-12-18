@@ -8,56 +8,75 @@ internal class UserInterfaceUpdates
     [HarmonyPatch(typeof(EquipItemPopup), nameof(EquipItemPopup.UpdateAmmoStatus))]
     private static class UpdateUIBasedOnAmmoType
     {
-        private static UILabel clonedLabel = null;
+        private static readonly Dictionary<BulletType, GameObject> ammoWidgetClones = [];
 
         private static void Postfix(EquipItemPopup __instance)
         {
             GunItem? gunItem = GameManager.GetPlayerManagerComponent().m_ItemInHands?.m_GunItem;
             if (gunItem == null) return;
 
+            AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
+            if (ammoManager == null) return;
+
             UISprite[] ammoSprites = __instance.m_ListAmmoSprites;
             AmmoManager.UpdateAmmoSprites(gunItem, ammoSprites);
 
-            if (clonedLabel == null)
+            BulletType prioritizedBulletType = ammoManager.GetNextBulletType();
+
+            EquipItemPopupExtension equipItemPopupExtension = __instance.GetComponent<EquipItemPopupExtension>();
+            if (equipItemPopupExtension == null) return;
+
+            if (ammoWidgetClones.Count == 0)
             {
-                clonedLabel = UnityEngine.Object.Instantiate(__instance.m_LabelAmmoReserve, __instance.m_LabelAmmoReserve.transform.parent);
-                clonedLabel.gameObject.name = "ClonedAmmoReserveLabel";
-                clonedLabel.transform.localPosition = new Vector3(__instance.m_LabelAmmoReserve.transform.localPosition.x,
-                                                                 __instance.m_LabelAmmoReserve.transform.localPosition.y - 20,
-                                                                 __instance.m_LabelAmmoReserve.transform.localPosition.z);
-            }
-
-            int standardAmmoCount = GetBulletCountInInventory(BulletType.Standard, gunItem);
-            __instance.m_LabelAmmoReserve.text = $"ST: {standardAmmoCount}";
-
-            int armorPiercingAmmoCount = GetBulletCountInInventory(BulletType.ArmorPiercing, gunItem);
-            clonedLabel.text = $"AP: {armorPiercingAmmoCount}";
-        }
-
-        private static int GetBulletCountInInventory(BulletType bulletType, GunItem gunItem)
-        {
-            Inventory inventory = GameManager.GetInventoryComponent();
-            if (inventory == null)
-            {
-                Logging.LogError("Inventory component not found.");
-                return 0;
-            }
-
-            int count = 0;
-            foreach (var gearItemObject in inventory.m_Items)
-            {
-                GearItem gearItem = gearItemObject;
-                if (gearItem != null && AmmoManager.IsValidAmmo(gearItem, gunItem.m_GearItem))
+                foreach (BulletType bulletType in Enum.GetValues(typeof(BulletType)))
                 {
-                    AmmoItemExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoItemExtension>();
-                    if (ammoExtension != null && ammoExtension.m_BulletType == bulletType)
+                    if (bulletType == BulletType.Unspecified)
                     {
-                        count += gearItem.m_StackableItem.m_Units;
+                        __instance.m_LabelAmmoReserve.gameObject.SetActive(true);
+                        continue;
+                    }
+                    else
+                    {
+                        GameObject? prefab = equipItemPopupExtension.m_AmmoWidgetExtensionPrefab;
+                        if (prefab == null) continue;
+
+                        GameObject prefabInstance = UnityEngine.Object.Instantiate(prefab, prefab.transform.parent);
+                        prefabInstance.name = $"AmmoWidgetExtension_{bulletType}";
+
+                        UILabel? labelAmmoCount = prefabInstance.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>();
+                        UILabel? labelAmmoType = prefabInstance.transform.Find("Label_AmmoType")?.GetComponent<UILabel>();
+                        if (labelAmmoCount == null || labelAmmoType == null) continue;
+
+                        labelAmmoCount.text = AmmoManager.GetBulletCountInInventory(bulletType, gunItem).ToString();
+                        labelAmmoType.text = bulletType.ToString();
+
+                        ammoWidgetClones[bulletType] = prefabInstance;
+
+                        __instance.m_LabelAmmoReserve.gameObject.SetActive(false);
                     }
                 }
             }
 
-            return count;
+            foreach (var pair in ammoWidgetClones)
+            {
+                int ammoCount = AmmoManager.GetBulletCountInInventory(pair.Key, gunItem);
+                UILabel? labelAmmoCount = pair.Value.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>();
+                UILabel? labelAmmoType = pair.Value.transform.Find("Label_AmmoType")?.GetComponent<UILabel>();
+
+                if (labelAmmoCount != null)
+                {
+                    labelAmmoCount.text = ammoCount.ToString();
+                }
+
+                if (labelAmmoType != null)
+                {
+                    string bulletTypeName = AmmoManager.FormatBulletTypeName(pair.Key);
+                    labelAmmoType.text = $"({bulletTypeName})";
+                    labelAmmoType.color = AmmoManager.GetColorForBulletType(pair.Key);
+                }
+
+                pair.Value.SetActive(pair.Key == prioritizedBulletType);
+            }
         }
     }
 }

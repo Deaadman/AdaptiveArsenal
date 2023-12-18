@@ -4,6 +4,18 @@ namespace ExtendedWeaponry;
 
 internal class InitializeComponents
 {
+    [HarmonyPatch(typeof(EquipItemPopup), nameof(EquipItemPopup.Awake))]
+    private static class TestingPatch
+    {
+        private static void Postfix(EquipItemPopup __instance)
+        {
+            if (__instance.GetComponent<EquipItemPopup>() != null)
+            {
+                _ = __instance.gameObject.GetComponent<EquipItemPopupExtension>() ?? __instance.gameObject.AddComponent<EquipItemPopupExtension>();
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(GearItem), nameof(GearItem.Awake))]
     private static class ApplyScriptExtensions
     {
@@ -11,7 +23,7 @@ internal class InitializeComponents
         {
             if (__instance.GetComponent<AmmoItem>() != null && !__instance.name.Contains("GEAR_FlareGunAmmoSingle"))
             {
-                _ = __instance.gameObject.GetComponent<AmmoItemExtension>() ?? __instance.gameObject.AddComponent<AmmoItemExtension>();
+                _ = __instance.gameObject.GetComponent<AmmoExtension>() ?? __instance.gameObject.AddComponent<AmmoExtension>();
             }
 
             if (__instance.GetComponent<GunItem>() != null && !__instance.name.Contains("GEAR_FlareGun"))
