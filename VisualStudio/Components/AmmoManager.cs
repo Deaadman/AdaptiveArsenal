@@ -12,11 +12,16 @@ public class AmmoManager : MonoBehaviour
     }
 
     internal List<BulletInfo> m_Clip = [];
+    private GunItem? m_GunItem;
+
+    private void Awake()
+    {
+        m_GunItem = GetComponent<GunItem>();
+    }
 
     internal void AddRoundsToClip(BulletType bulletType)
     {
-        GunItem gunItem = GetComponent<GunItem>();
-        if (gunItem != null && m_Clip.Count < gunItem.m_ClipSize)
+        if (m_GunItem != null && m_Clip.Count < m_GunItem.m_ClipSize)
         {
             m_Clip.Add(new BulletInfo { m_BulletType = bulletType });
         }
@@ -63,8 +68,7 @@ public class AmmoManager : MonoBehaviour
             return BulletType.Unspecified;
         }
 
-        GunItem gunItem = GetComponent<GunItem>();
-        if (gunItem == null)
+        if (m_GunItem == null)
         {
             Logging.LogError("GunItem component not found on AmmoManager.");
             return BulletType.Unspecified;
@@ -73,7 +77,7 @@ public class AmmoManager : MonoBehaviour
         Il2CppSystem.Collections.Generic.List<GearItem> ammoItems = new();
         foreach (var gearItem in inventory.m_Items)
         {
-            if (IsValidAmmo(gearItem, gunItem.m_GearItem))
+            if (IsValidAmmo(gearItem, m_GunItem.m_GearItem))
             {
                 ammoItems.Add(gearItem);
             }
@@ -104,7 +108,9 @@ public class AmmoManager : MonoBehaviour
 
     internal static bool IsValidAmmo(GearItem gearItem, GearItem weapon)
     {
-        bool isValid = gearItem != null && gearItem.m_AmmoItem && gearItem.m_StackableItem && gearItem.GetRoundedCondition() != 0 && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType;
+        if (gearItem == null || weapon == null || gearItem.m_AmmoItem == null || weapon.m_GunItem == null) return false;
+
+        bool isValid = gearItem.m_AmmoItem && gearItem.m_StackableItem && gearItem.GetRoundedCondition() != 0 && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType;
         return isValid;
     }
 
@@ -139,18 +145,38 @@ public class AmmoManager : MonoBehaviour
         }
     }
 
+    internal static void UpdateAmmoSprites(GunItem gunItem, UISprite[] ammoSprites)
+    {
+        if (gunItem.name.Contains("GEAR_FlareGun") && ammoSprites.Length > 0)
+        {
+            ammoSprites[0].color = Color.white;
+        }
+        else
+        {
+            AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
+            if (ammoManager == null) return;
+
+            for (int i = 0; i < ammoSprites.Length; i++)
+            {
+                if (i < ammoManager.m_Clip.Count)
+                {
+                    var bulletInfo = ammoManager.m_Clip[i];
+                    Color color = GetColorForBulletType(bulletInfo.m_BulletType);
+                    ammoSprites[i].color = color;
+                }
+                else if (i < gunItem.m_ClipSize)
+                {
+                    ammoSprites[i].color = Color.white;
+                }
+            }
+        }
+    }
+
     internal static void UpdateBulletMaterials(Transform meshesTransform, AmmoManager ammoManager, Material nextBulletMaterial)
     {
         int loadedBullets = ammoManager.GetLoadedBulletCount();
-        if (loadedBullets == 1)
-        {
-            TextureSwapper.SwapMaterial(meshesTransform, "mesh_bullet_a", nextBulletMaterial);
-        }
-        else if (loadedBullets > 1)
-        {
-            TextureSwapper.SwapMaterial(meshesTransform, "mesh_bullet_b", nextBulletMaterial);
-        }
-
+        string bulletMeshName = loadedBullets == 1 ? "mesh_bullet_a" : "mesh_bullet_b";
+        TextureSwapper.SwapMaterial(meshesTransform, bulletMeshName, nextBulletMaterial);
         TextureSwapper.SwapMaterial(meshesTransform, "mesh_StripperClipBullets", nextBulletMaterial);
     }
 }

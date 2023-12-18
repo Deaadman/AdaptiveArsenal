@@ -55,9 +55,7 @@ internal class ReloadMechanics
                 }
             }
 
-            __result = bulletTypeCounts.TryGetValue(BulletType.ArmorPiercing, out int apCount) && apCount > 0 ? apCount
-                      : bulletTypeCounts.TryGetValue(BulletType.Standard, out int standardCount) ? standardCount
-                      : 0;
+            __result = bulletTypeCounts.TryGetValue(BulletType.ArmorPiercing, out int apCount) && apCount > 0 ? apCount : bulletTypeCounts.TryGetValue(BulletType.Standard, out int standardCount) ? standardCount : 0;
         }
     }
 

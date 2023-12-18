@@ -1,42 +1,63 @@
 ﻿using ExtendedWeaponry.Components;
+using ExtendedWeaponry.Utilities;
 
 namespace ExtendedWeaponry;
 
 internal class UserInterfaceUpdates
 {
     [HarmonyPatch(typeof(EquipItemPopup), nameof(EquipItemPopup.UpdateAmmoStatus))]
-    private static class UpdateSpritesColorBasedOnAmmoType
+    private static class UpdateUIBasedOnAmmoType
     {
+        private static UILabel clonedLabel = null;
+
         private static void Postfix(EquipItemPopup __instance)
         {
             GunItem? gunItem = GameManager.GetPlayerManagerComponent().m_ItemInHands?.m_GunItem;
             if (gunItem == null) return;
 
             UISprite[] ammoSprites = __instance.m_ListAmmoSprites;
+            AmmoManager.UpdateAmmoSprites(gunItem, ammoSprites);
 
-            if (gunItem.name.Contains("GEAR_FlareGun") && ammoSprites.Length > 0)               // Works for now, but doesn't indicate weather a bullet is loaded or not. Always indicates as if there is a bullet in the flare gun.
+            if (clonedLabel == null)
             {
-                ammoSprites[0].color = Color.white;
+                clonedLabel = UnityEngine.Object.Instantiate(__instance.m_LabelAmmoReserve, __instance.m_LabelAmmoReserve.transform.parent);
+                clonedLabel.gameObject.name = "ClonedAmmoReserveLabel";
+                clonedLabel.transform.localPosition = new Vector3(__instance.m_LabelAmmoReserve.transform.localPosition.x,
+                                                                 __instance.m_LabelAmmoReserve.transform.localPosition.y - 20,
+                                                                 __instance.m_LabelAmmoReserve.transform.localPosition.z);
             }
-            else
-            {
-                AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
-                if (ammoManager == null) return;
 
-                for (int i = 0; i < ammoSprites.Length; i++)
+            int standardAmmoCount = GetBulletCountInInventory(BulletType.Standard, gunItem);
+            __instance.m_LabelAmmoReserve.text = $"ST: {standardAmmoCount}";
+
+            int armorPiercingAmmoCount = GetBulletCountInInventory(BulletType.ArmorPiercing, gunItem);
+            clonedLabel.text = $"AP: {armorPiercingAmmoCount}";
+        }
+
+        private static int GetBulletCountInInventory(BulletType bulletType, GunItem gunItem)
+        {
+            Inventory inventory = GameManager.GetInventoryComponent();
+            if (inventory == null)
+            {
+                Logging.LogError("Inventory component not found.");
+                return 0;
+            }
+
+            int count = 0;
+            foreach (var gearItemObject in inventory.m_Items)
+            {
+                GearItem gearItem = gearItemObject;
+                if (gearItem != null && AmmoManager.IsValidAmmo(gearItem, gunItem.m_GearItem))
                 {
-                    if (i < ammoManager.m_Clip.Count)
+                    AmmoItemExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoItemExtension>();
+                    if (ammoExtension != null && ammoExtension.m_BulletType == bulletType)
                     {
-                        var bulletInfo = ammoManager.m_Clip[i];
-                        Color color = AmmoManager.GetColorForBulletType(bulletInfo.m_BulletType);
-                        ammoSprites[i].color = color;
-                    }
-                    else if (i < gunItem.m_ClipSize)
-                    {
-                        ammoSprites[i].color = Color.white;
+                        count += gearItem.m_StackableItem.m_Units;
                     }
                 }
             }
+
+            return count;
         }
     }
 }

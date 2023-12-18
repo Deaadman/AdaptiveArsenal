@@ -1,0 +1,37 @@
+{
+    "ModAmmoComponent": {
+                                "DisplayNameLocalizationId" : "GAMEPLAY_RifleAmmoSingleAP",
+                                "DescriptionLocalizatonId" : "GAMEPLAY_RifleAmmoSingleAPDescription",
+                                "InventoryActionLocalizationId" : "",
+                                "WeightKG": 0.02,
+                                "DaysToDecay" : 0,
+                                "MaxHP" : 100,
+                                "InitialCondition" : "Perfect",
+                                "InventoryCategory" : "Tool",
+                                "PickUpAudio" : "Play_SndInvBullet",
+                                "PutBackAudio" : "Play_SndInvBullet",
+                                "StowAudio" : "Play_InventoryStow",
+                                "WornOutAudio" : "",
+                                "InspectOnPickup" : true,
+                                "InspectDistance" : 0.25,
+                                "InspectAngles" : [45, 65, 45],
+                                "InspectOffset" : [0, 0, 0],
+                                "InspectScale" :  [0.5, 0.5, 0.5],
+                                "NormalModel" : "",
+                                "InspectModel" : "",
+                                "HoverIconsToShow" : "Tool",
+
+                                "AmmoForGunType" : "Rifle"
+                        },
+
+    "ModStackableBehaviour": {
+                                "SingleUnitTextId" : "GAMEPLAY_Round",
+                                "MultipleUnitTextId" : "GAMEPLAY_Rounds",
+                                "StackSprite" : "",
+                                "UnitsPerItem" : 1,
+                                "ChanceFull" : 100,
+                                "ShareStackWithGear" : ["GEAR_RifleAmmoBoxAP"],
+                                "InstantiateStackItem" : "GEAR_RifleAmmoBoxAP",
+                                "StackConditionDifferenceConstraint" : 0.01
+    }
+}
