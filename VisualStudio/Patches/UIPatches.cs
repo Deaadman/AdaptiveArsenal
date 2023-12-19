@@ -6,7 +6,7 @@ namespace ExtendedWeaponry.Patches;
 internal class UIPatches
 {
     [HarmonyPatch(typeof(EquipItemPopup), nameof(EquipItemPopup.UpdateAmmoStatus))]
-    private static class UpdateAmmoWidgetBasedOnAmmoType
+    private static class AmmoWidgetAmmoType
     {
         private static readonly Dictionary<AmmoType, GameObject> ammoWidgetClones = [];
 
@@ -87,17 +87,46 @@ internal class UIPatches
         {
             if (gi.m_AmmoItem)
             {
-                AmmoAddon ammoExtension = gi.GetComponent<AmmoAddon>();
-                if (ammoExtension != null)
+                AmmoAddon ammoAddon = gi.GetComponent<AmmoAddon>();
+                if (ammoAddon != null)
                 {
-                    AmmoType bulletType = ammoExtension.m_AmmoType;
+                    AmmoType ammoType = ammoAddon.m_AmmoType;
                     __instance.m_ItemNotesLabel.gameObject.SetActive(true);
-                    __instance.m_ItemNotesLabel.text = AmmoUtilities.AmmoTypeLocalization(bulletType);
-                    __instance.m_ItemNotesLabel.color = AmmoUtilities.AmmoTypeColours(bulletType);
+                    __instance.m_ItemNotesLabel.text = AmmoUtilities.AmmoTypeLocalization(ammoType);
+                    __instance.m_ItemNotesLabel.color = AmmoUtilities.AmmoTypeColours(ammoType);
                 }
                 else
                 {
                     __instance.m_ItemNotesLabel.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.InitLabelsForGear))]
+    private static class InspectAmmoType
+    {
+        private static void Prefix(PlayerManager __instance)
+        {
+            Panel_HUD panelHUD = InterfaceManager.GetPanel<Panel_HUD>();
+            PanelHUDAddon hudAddon = panelHUD.GetComponent<PanelHUDAddon>();
+
+            if (hudAddon.m_Prefab != null)
+            {
+                if (__instance.m_Gear.m_AmmoItem)
+                {
+                    AmmoAddon ammoAddon = __instance.m_Gear.m_AmmoItem.GetComponent<AmmoAddon>();
+                    if (ammoAddon != null && hudAddon.m_LabelInspectAmmoType != null)
+                    {
+                        AmmoType ammoType = ammoAddon.m_AmmoType;
+                        hudAddon.m_LabelInspectAmmoType.text = AmmoUtilities.AmmoTypeLocalization(ammoType);
+                        hudAddon.m_LabelInspectAmmoType.color = AmmoUtilities.AmmoTypeColours(ammoType);
+                        hudAddon.m_Prefab.SetActive(true);
+                    }
+                }
+                else
+                {
+                    hudAddon.m_Prefab.SetActive(false);
                 }
             }
         }

@@ -5,7 +5,7 @@ namespace ExtendedWeaponry;
 internal class InitializeComponents
 {
     [HarmonyPatch(typeof(EquipItemPopup), nameof(EquipItemPopup.Awake))]
-    private static class TestingPatch
+    private static class ApplyEquipItemPopupComponents
     {
         private static void Postfix(EquipItemPopup __instance)
         {
@@ -17,7 +17,7 @@ internal class InitializeComponents
     }
 
     [HarmonyPatch(typeof(GearItem), nameof(GearItem.Awake))]
-    private static class ApplyScriptExtensions
+    private static class ApplyGearItemComponents
     {
         private static void Postfix(GearItem __instance)
         {
@@ -30,6 +30,18 @@ internal class InitializeComponents
             {
                 _ = __instance.gameObject.GetComponent<AmmoManager>() ?? __instance.gameObject.AddComponent<AmmoManager>();
                 //_ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Panel_HUD), nameof(Panel_HUD.Initialize))]
+    private static class ApplyPanel_HUDComponents
+    {
+        private static void Postfix(Panel_HUD __instance)
+        {
+            if (__instance.GetComponent<Panel_HUD>() != null)
+            {
+                _ = __instance.gameObject.GetComponent<PanelHUDAddon>() ?? __instance.gameObject.AddComponent<PanelHUDAddon>();
             }
         }
     }

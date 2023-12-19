@@ -1,27 +1,33 @@
 ﻿namespace ExtendedWeaponry.Utilities;
 
-internal class AssetBundleLoader
+internal static class AssetBundleLoader
 {
-    internal static AssetBundle? LoadBundle(string path)
-    {
-        AssetBundle? temp;
-        MemoryStream? memory;
-        Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
+    private static AssetBundle? m_ExtendedWeaponryAssetBundle;
+    private static readonly string m_BundlePath = "ExtendedWeaponry.Resources.ExtendedWeaponryAssetBundle";
+    private static bool m_IsBundleLoaded = false;
 
-        if (stream == null)
+    internal static AssetBundle? LoadBundle()
+    {
+        if (!m_IsBundleLoaded)
         {
-            Logging.LogError("Stream is null. Unable to load asset bundle.");
-            return null;
+            Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(m_BundlePath);
+
+            if (stream == null)
+            {
+                Logging.LogError("Stream is null. Unable to load asset bundle.");
+                return null;
+            }
+
+            using (MemoryStream memory = new((int)stream.Length))
+            {
+                stream.CopyTo(memory);
+                m_ExtendedWeaponryAssetBundle = AssetBundle.LoadFromMemory(memory.ToArray());
+            }
+
+            stream.Dispose();
+            m_IsBundleLoaded = true;
         }
 
-        memory = new MemoryStream((int)stream.Length);
-        stream.CopyTo(memory);
-
-        temp = AssetBundle.LoadFromMemory(memory.ToArray());
-
-        memory.Dispose();
-        stream.Dispose();
-
-        return temp;
+        return m_ExtendedWeaponryAssetBundle;
     }
 }
