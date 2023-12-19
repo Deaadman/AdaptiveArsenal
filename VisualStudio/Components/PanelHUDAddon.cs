@@ -6,7 +6,7 @@ namespace ExtendedWeaponry.Components;
 public class PanelHUDAddon : MonoBehaviour
 {
     private Panel_HUD? m_Panel_HUD;
-    internal GameObject? m_Prefab;
+    internal GameObject? m_AmmoTypePrefab;
     internal UILabel? m_LabelInspectAmmoType;
 
     private void Awake()
@@ -19,10 +19,10 @@ public class PanelHUDAddon : MonoBehaviour
 
         if (testingInstance != null)
         {
-            m_Prefab = testingInstance;
-            m_Prefab.transform.SetSiblingIndex(0);
-            m_Prefab.SetActive(false);
-            m_LabelInspectAmmoType = m_Prefab.transform.Find("Label_InspectMode_AmmoType")?.GetComponent<UILabel>();
+            m_AmmoTypePrefab = testingInstance;
+            m_AmmoTypePrefab.transform.SetSiblingIndex(0);
+            m_AmmoTypePrefab.SetActive(false);
+            m_LabelInspectAmmoType = m_AmmoTypePrefab.transform.Find("Label_InspectMode_AmmoType")?.GetComponent<UILabel>();
         }
 
         SetupInspectFade();

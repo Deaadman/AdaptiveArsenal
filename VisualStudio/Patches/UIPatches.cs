@@ -111,7 +111,7 @@ internal class UIPatches
             Panel_HUD panelHUD = InterfaceManager.GetPanel<Panel_HUD>();
             PanelHUDAddon hudAddon = panelHUD.GetComponent<PanelHUDAddon>();
 
-            if (hudAddon.m_Prefab != null)
+            if (hudAddon.m_AmmoTypePrefab != null)
             {
                 if (__instance.m_Gear.m_AmmoItem)
                 {
@@ -121,12 +121,12 @@ internal class UIPatches
                         AmmoType ammoType = ammoAddon.m_AmmoType;
                         hudAddon.m_LabelInspectAmmoType.text = AmmoUtilities.AmmoTypeLocalization(ammoType);
                         hudAddon.m_LabelInspectAmmoType.color = AmmoUtilities.AmmoTypeColours(ammoType);
-                        hudAddon.m_Prefab.SetActive(true);
+                        hudAddon.m_AmmoTypePrefab.SetActive(true);
                     }
                 }
                 else
                 {
-                    hudAddon.m_Prefab.SetActive(false);
+                    hudAddon.m_AmmoTypePrefab.SetActive(false);
                 }
             }
         }
