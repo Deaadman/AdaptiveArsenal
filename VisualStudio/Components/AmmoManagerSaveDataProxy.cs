@@ -1,8 +1,6 @@
-﻿using ExtendedWeaponry.Utilities;
-
-namespace ExtendedWeaponry.Components;
+﻿namespace ExtendedWeaponry.Components;
 
 internal class AmmoManagerSaveDataProxy
 {
-    internal List<BulletType> m_Clip = [];
+    public List<AmmoType>? m_Clip { get; set; }
 }

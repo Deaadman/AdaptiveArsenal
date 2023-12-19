@@ -11,7 +11,7 @@ internal class InitializeComponents
         {
             if (__instance.GetComponent<EquipItemPopup>() != null)
             {
-                _ = __instance.gameObject.GetComponent<EquipItemPopupExtension>() ?? __instance.gameObject.AddComponent<EquipItemPopupExtension>();
+                _ = __instance.gameObject.GetComponent<EquipItemPopupAddon>() ?? __instance.gameObject.AddComponent<EquipItemPopupAddon>();
             }
         }
     }
@@ -23,7 +23,7 @@ internal class InitializeComponents
         {
             if (__instance.GetComponent<AmmoItem>() != null && !__instance.name.Contains("GEAR_FlareGunAmmoSingle"))
             {
-                _ = __instance.gameObject.GetComponent<AmmoExtension>() ?? __instance.gameObject.AddComponent<AmmoExtension>();
+                _ = __instance.gameObject.GetComponent<AmmoAddon>() ?? __instance.gameObject.AddComponent<AmmoAddon>();
             }
 
             if (__instance.GetComponent<GunItem>() != null && !__instance.name.Contains("GEAR_FlareGun"))
