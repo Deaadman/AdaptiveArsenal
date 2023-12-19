@@ -1,7 +1,7 @@
 {
     "ModAmmoComponent": {
-                                "DisplayNameLocalizationId" : "GAMEPLAY_RifleAmmoBoxAP",
-                                "DescriptionLocalizatonId" : "GAMEPLAY_RifleAmmoBoxAPDescription",
+                                "DisplayNameLocalizationId" : "GAMEPLAY_RifleAmmunition",
+                                "DescriptionLocalizatonId" : "GAMEPLAY_RifleAmmunitionDescription",
                                 "InventoryActionLocalizationId" : "",
                                 "WeightKG": 0.1,
                                 "DaysToDecay" : 0,

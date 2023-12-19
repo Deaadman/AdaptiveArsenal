@@ -6,13 +6,9 @@ namespace ExtendedWeaponry.Components;
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoManager : MonoBehaviour
 {
-    internal struct BulletInfo
-    {
-        public BulletType m_BulletType;
-    }
-
-    internal List<BulletInfo> m_Clip = [];
+    internal List<BulletType> m_Clip = [];
     private GunItem? m_GunItem;
+    private static AmmoManagerSaveDataProxy m_AmmoManagerSaveDataProxy = new();
 
     private void Awake()
     {
@@ -23,7 +19,7 @@ public class AmmoManager : MonoBehaviour
     {
         if (m_GunItem != null && m_Clip.Count < m_GunItem.m_ClipSize)
         {
-            m_Clip.Add(new BulletInfo { m_BulletType = bulletType });
+            m_Clip.Add(bulletType);
         }
     }
 
@@ -31,8 +27,8 @@ public class AmmoManager : MonoBehaviour
     {
         return bulletType switch
         {
-            BulletType.ArmorPiercing => "Armor Piercing",
-            BulletType.Standard => "Standard",
+            BulletType.ArmorPiercing => Localization.Get("GAMEPLAY_ArmorPiercing"),
+            BulletType.FullMetalJacket => Localization.Get("GAMEPLAY_FullMetalJacket"),
             _ => bulletType.ToString(),
         };
     }
@@ -50,7 +46,7 @@ public class AmmoManager : MonoBehaviour
         foreach (var gearItemObject in inventory.m_Items)
         {
             GearItem gearItem = gearItemObject;
-            if (gearItem != null && AmmoManager.IsValidAmmo(gearItem, gunItem.m_GearItem))
+            if (gearItem != null && IsValidAmmo(gearItem, gunItem.m_GearItem))
             {
                 AmmoExtension ammoExtension = gearItem.gameObject.GetComponent<AmmoExtension>();
                 if (ammoExtension != null && ammoExtension.m_BulletType == bulletType)
@@ -68,7 +64,7 @@ public class AmmoManager : MonoBehaviour
         return bulletType switch
         {
             BulletType.ArmorPiercing => Color.green,
-            BulletType.Standard => Color.yellow,
+            BulletType.FullMetalJacket => Color.yellow,
             BulletType.Unspecified => Color.white,                          // Could use this for the Flare Gun items instead, would just need a way to get the game to run reload normally if the BulletType is Unspecified.
             _ => Color.white,
         };
@@ -136,7 +132,7 @@ public class AmmoManager : MonoBehaviour
         return bulletType switch
         {
             BulletType.ArmorPiercing => "GEAR_RifleAmmoSingleAP",
-            BulletType.Standard => "GEAR_RifleAmmoSingle",
+            BulletType.FullMetalJacket => "GEAR_RifleAmmoSingle",
             _ => null,
         };
     }
@@ -165,17 +161,17 @@ public class AmmoManager : MonoBehaviour
     }
 
     [HideFromIl2Cpp]
-    internal bool RemoveNextFromClip(out BulletInfo bulletInfo)
+    internal bool RemoveNextFromClip(out BulletType bulletType)
     {
         if (m_Clip.Count > 0)
         {
-            bulletInfo = m_Clip[0];
+            bulletType = m_Clip[0];
             m_Clip.RemoveAt(0);
             return true;
         }
         else
         {
-            bulletInfo = new BulletInfo();
+            bulletType = BulletType.Unspecified;
             return false;
         }
     }
@@ -195,8 +191,8 @@ public class AmmoManager : MonoBehaviour
             {
                 if (i < ammoManager.m_Clip.Count)
                 {
-                    var bulletInfo = ammoManager.m_Clip[i];
-                    Color color = GetColorForBulletType(bulletInfo.m_BulletType);
+                    BulletType bulletType = ammoManager.m_Clip[i];
+                    Color color = GetColorForBulletType(bulletType);
                     ammoSprites[i].color = color;
                 }
                 else if (i < gunItem.m_ClipSize)

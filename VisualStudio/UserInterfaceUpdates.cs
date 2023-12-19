@@ -71,11 +71,34 @@ internal class UserInterfaceUpdates
                 if (labelAmmoType != null)
                 {
                     string bulletTypeName = AmmoManager.FormatBulletTypeName(pair.Key);
-                    labelAmmoType.text = $"({bulletTypeName})";
+                    labelAmmoType.text = $"{bulletTypeName}";
                     labelAmmoType.color = AmmoManager.GetColorForBulletType(pair.Key);
                 }
 
                 pair.Value.SetActive(pair.Key == prioritizedBulletType);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ItemDescriptionPage), nameof(ItemDescriptionPage.UpdateGearItemDescription))]
+    private static class InventoryAmmoType
+    {
+        private static void Postfix(ItemDescriptionPage __instance, GearItem gi)
+        {
+            if (gi.m_AmmoItem)
+            {
+                AmmoExtension ammoExtension = gi.GetComponent<AmmoExtension>();
+                if (ammoExtension != null)
+                {
+                    BulletType bulletType = ammoExtension.m_BulletType;
+                    __instance.m_ItemNotesLabel.gameObject.SetActive(true);
+                    __instance.m_ItemNotesLabel.text = AmmoManager.FormatBulletTypeName(bulletType);
+                    __instance.m_ItemNotesLabel.color = AmmoManager.GetColorForBulletType(bulletType);
+                }
+                else
+                {
+                    __instance.m_ItemNotesLabel.gameObject.SetActive(false);
+                }
             }
         }
     }

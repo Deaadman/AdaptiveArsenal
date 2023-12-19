@@ -27,11 +27,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\ExtendedWeaponryAssetBundle" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <EmbeddedResource Include="Resources\ExtendedWeaponryAssetBundle" />
+	  <EmbeddedResource Include="Resources\Localization.json" />
 	</ItemGroup>
 
 	<!-- List of used references -->
@@ -41,9 +38,9 @@
 		<!-- Uncomment whatever is required for your needs. -->
 		<!-- <PackageReference Include="STBlade.Modding.TLD.CraftingRevisions" Version="2.2.1" /> -->
 		<!-- <PackageReference Include="STBlade.Modding.TLD.GearSpawner" Version="2.3.1" /> -->
-		<!-- <PackageReference Include="STBlade.Modding.TLD.LocalizationUtilities" Version="2.0.0" /> -->
+		<PackageReference Include="STBlade.Modding.TLD.LocalizationUtilities" Version="2.0.0" />
 		<!-- <PackageReference Include="STBlade.Modding.TLD.ModComponent" Version="6.2.3" /> -->
-		<!-- <PackageReference Include="STBlade.Modding.TLD.ModData" Version="1.5.1" /> -->
+		<PackageReference Include="STBlade.Modding.TLD.ModData" Version="1.5.1" />
 		<!-- <PackageReference Include="STBlade.Modding.TLD.ModSettings" Version="1.9.0" /> -->
 	</ItemGroup>
 	<ItemGroup>
@@ -64,9 +61,9 @@
 		<!-- Uncomment whatever is required for your needs. -->
 		<!-- <Using Include="CraftingRevisions" /> -->
 		<!-- <Using Include="GearSpawner" /> -->
-		<!-- <Using Include="LocalizationUtilities" /> -->
+		<Using Include="LocalizationUtilities" />
 		<Using Include="ModComponent" />
-		<!-- <Using Include="ModData" /> -->
+		<Using Include="ModData" />
 		<!-- <Using Include="ModSettings" /> -->
 	</ItemGroup>
 

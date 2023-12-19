@@ -4,6 +4,30 @@ namespace ExtendedWeaponry;
 
 internal sealed class Mod : MelonMod
 {
+    public override void OnInitializeMelon()
+    {
+        LoadLocalizations();
+    }
+
+    private static void LoadLocalizations()
+    {
+        const string JSONfile = "ExtendedWeaponry.Resources.Localization.json";
+
+        try
+        {
+            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(JSONfile) ?? throw new InvalidOperationException($"Failed to load resource: {JSONfile}");
+            using StreamReader reader = new(stream);
+
+            string results = reader.ReadToEnd();
+
+            LocalizationManager.LoadJsonLocalization(results);
+        }
+        catch (Exception ex)
+        {
+            Logging.LogError(ex.Message);
+        }
+    }
+
     [HarmonyPatch(typeof(vp_Bullet), nameof(vp_Bullet.SpawnImpactEffects))]
     private static class LogBulletData
     {

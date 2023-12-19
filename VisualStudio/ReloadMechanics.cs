@@ -10,16 +10,26 @@ internal class ReloadMechanics
     {
         private static void Postfix(GunItem __instance, int count)
         {
-            AmmoManager extension = __instance.GetComponent<AmmoManager>();
-            if (extension == null) return;
+            AmmoManager ammoManager = __instance.GetComponent<AmmoManager>();
+            if (ammoManager == null) return;
 
             for (int i = 0; i < count; i++)
             {
-                BulletType bulletType = extension.GetNextBulletType();
-                extension.AddRoundsToClip(bulletType);
+                BulletType bulletType = ammoManager.GetNextBulletType();
+                ammoManager.AddRoundsToClip(bulletType);
             }
         }
     }
+
+    //[HarmonyPatch(typeof(GearItem), nameof(GearItem.Serialize))]
+    //private class TestingSaving
+    //{
+    //    private static void Postfix(GearItem __instance)
+    //    {
+    //        AmmoManager ammoManager = __instance.GetComponent<AmmoManager>();
+    //        ammoManager?.SaveAmmoData();
+    //    }
+    //}
 
     [HarmonyPatch(typeof(GunItem), nameof(GunItem.Fired))]
     private static class RemoveRoundsFromCustomClip
@@ -29,9 +39,9 @@ internal class ReloadMechanics
             AmmoManager extension = __instance.GetComponent<AmmoManager>();
             if (extension != null)
             {
-                if (extension.RemoveNextFromClip(out AmmoManager.BulletInfo bulletInfo))
+                if (extension.RemoveNextFromClip(out BulletType bulletType))
                 {
-                    Logging.Log($"Removed bullet from clip: BulletType = {bulletInfo.m_BulletType}");
+                    Logging.Log($"Removed bullet from clip: BulletType = {bulletType}");
                 }
             }
         }
@@ -55,7 +65,7 @@ internal class ReloadMechanics
                 }
             }
 
-            __result = bulletTypeCounts.TryGetValue(BulletType.ArmorPiercing, out int apCount) && apCount > 0 ? apCount : bulletTypeCounts.TryGetValue(BulletType.Standard, out int standardCount) ? standardCount : 0;
+            __result = bulletTypeCounts.TryGetValue(BulletType.ArmorPiercing, out int apCount) && apCount > 0 ? apCount : bulletTypeCounts.TryGetValue(BulletType.FullMetalJacket, out int fullMetalJacketCount) ? fullMetalJacketCount : 0;
         }
     }
 

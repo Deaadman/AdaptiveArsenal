@@ -18,7 +18,7 @@ public class AmmoExtension : MonoBehaviour
             }
             else if (gameObject.name.Contains("GEAR_RevolverAmmoSingle") || gameObject.name.Contains("GEAR_RifleAmmoSingle") || gameObject.name.Contains("GEAR_RevolverAmmoBox") || gameObject.name.Contains("GEAR_RifleAmmoBox"))
             {
-                m_BulletType = BulletType.Standard;
+                m_BulletType = BulletType.FullMetalJacket;
             }
         }
     }

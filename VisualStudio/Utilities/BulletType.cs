@@ -4,6 +4,6 @@ internal enum BulletType
 {
     Unspecified,
 
-    Standard,
+    FullMetalJacket,
     ArmorPiercing
 }
