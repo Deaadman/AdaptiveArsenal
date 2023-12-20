@@ -21,12 +21,12 @@ internal class InitializeComponents
     {
         private static void Postfix(GearItem __instance)
         {
-            if (__instance.GetComponent<AmmoItem>() != null && !__instance.name.Contains("GEAR_FlareGunAmmoSingle"))
+            if (__instance.GetComponent<AmmoItem>() != null)
             {
-                _ = __instance.gameObject.GetComponent<AmmoAddon>() ?? __instance.gameObject.AddComponent<AmmoAddon>();
+                _ = __instance.gameObject.GetComponent<AmmoProjectile>() ?? __instance.gameObject.AddComponent<AmmoProjectile>();
             }
 
-            if (__instance.GetComponent<GunItem>() != null && !__instance.name.Contains("GEAR_FlareGun"))
+            if (__instance.GetComponent<GunItem>() != null)
             {
                 _ = __instance.gameObject.GetComponent<AmmoManager>() ?? __instance.gameObject.AddComponent<AmmoManager>();
                 //_ = __instance.gameObject.GetComponent<AttachmentManager>() ?? __instance.gameObject.AddComponent<AttachmentManager>();

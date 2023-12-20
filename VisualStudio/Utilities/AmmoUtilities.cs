@@ -36,7 +36,7 @@ internal class AmmoUtilities
             GearItem gearItem = gearItemObject;
             if (gearItem != null && IsValidAmmoType(gearItem, gunItem.m_GearItem))
             {
-                AmmoAddon ammoExtension = gearItem.gameObject.GetComponent<AmmoAddon>();
+                AmmoProjectile ammoExtension = gearItem.gameObject.GetComponent<AmmoProjectile>();
                 if (ammoExtension != null && ammoExtension.m_AmmoType == ammoType)
                 {
                     count += gearItem.m_StackableItem.m_Units;
@@ -81,7 +81,7 @@ internal class AmmoUtilities
 
     internal static void PrioritizeBulletType(GearItem gearItem, Dictionary<AmmoType, int> ammoTypeCounts)
     {
-        AmmoAddon ammoExtension = gearItem.GetComponent<AmmoAddon>();
+        AmmoProjectile ammoExtension = gearItem.GetComponent<AmmoProjectile>();
         if (ammoExtension != null)
         {
             AmmoType ammoType = ammoExtension.m_AmmoType;
@@ -98,28 +98,15 @@ internal class AmmoUtilities
         TextureSwapper.SwapMaterial(meshesTransform, "mesh_StripperClipBullets", nextAmmoMaterial);
     }
 
-    internal static void UpdateAmmoSprites(GunItem gunItem, UISprite[] ammoSprites) // Issue with flare gun ammo sprite copying last color loaded from other weapons.
-    {
-        if (gunItem.name.Contains("GEAR_FlareGun") && ammoSprites.Length > 0)
-        {
-            ammoSprites[0].color = Color.white;
-        }
-        else
-        {
-            UpdateAmmoSpriteColors(gunItem, ammoSprites);
-        }
-    }
-
-    private static void UpdateAmmoSpriteColors(GunItem gunItem, UISprite[] ammoSprites)
+    internal static void UpdateAmmoSprites(GunItem gunItem, UISprite[] ammoSprites)
     {
         AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
         if (ammoManager == null) return;
+        if (gunItem.name.Contains("GEAR_FlareGun")) return; // Only issue is that the sprite for the FlareGun stays the last colours that was chosen.
 
         for (int i = 0; i < ammoSprites.Length; i++)
         {
-            ammoSprites[i].color = i < ammoManager.m_Clip.Count ?
-                AmmoTypeColours(ammoManager.m_Clip[i]) :
-                Color.white;
+            ammoSprites[i].color = i < ammoManager.m_Clip.Count ? AmmoTypeColours(ammoManager.m_Clip[i]) : Color.white;
         }
     }
 }

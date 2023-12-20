@@ -31,7 +31,7 @@ internal class GunPatches
         private static void Postfix(GearItem weapon, ref int __result, Inventory __instance)
         {
             AmmoManager ammoManager = weapon.m_GunItem.GetComponent<AmmoManager>();
-            if (ammoManager == null) return;
+            if (ammoManager == null || ammoManager.GetNextAmmoType() == AmmoType.Unspecified) return;
 
             var ammoTypeCounts = new Dictionary<AmmoType, int>();
 
@@ -47,6 +47,23 @@ internal class GunPatches
         }
     }
 
+    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Start))] // Messing around with custom projectiles. This successfully spawns a GEAR_RifleAmmoSingle at the barrel of the weapon.
+    private static class SwapCustomProjectiles
+    {
+        private static void Postfix(vp_FPSShooter __instance)
+        {
+            if (__instance.gameObject.name.Contains("Rifle"))
+            {
+                GameObject newProjectilePrefab = GearItem.LoadGearItemPrefab("GEAR_RifleAmmoSingle").gameObject;
+                if (newProjectilePrefab != null)
+                {
+                    __instance.ProjectileCustomPrefab = true;
+                    __instance.ProjectilePrefab = newProjectilePrefab;
+                }
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Reload))]
     private static class SwapAmmoMaterials
     {
@@ -55,7 +72,7 @@ internal class GunPatches
             if (__instance.m_Weapon == null || __instance.m_Weapon.m_GearItem == null) return;
 
             AmmoManager ammoManager = __instance.m_Weapon.m_GearItem.GetComponent<AmmoManager>();
-            if (ammoManager == null) return;
+            if (ammoManager == null || ammoManager.GetNextAmmoType() == AmmoType.Unspecified) return;
 
             Material? nextAmmoMaterial = AmmoUtilities.GetMaterialForAmmoType(ammoManager.GetNextAmmoType());
             if (nextAmmoMaterial == null) return;

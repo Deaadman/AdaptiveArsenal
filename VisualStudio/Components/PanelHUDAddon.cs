@@ -5,9 +5,10 @@ namespace ExtendedWeaponry.Components;
 [RegisterTypeInIl2Cpp(false)]
 public class PanelHUDAddon : MonoBehaviour
 {
-    private Panel_HUD? m_Panel_HUD;
     internal GameObject? m_AmmoTypePrefab;
     internal UILabel? m_LabelInspectAmmoType;
+
+    private Panel_HUD? m_Panel_HUD;
 
     private void Awake()
     {

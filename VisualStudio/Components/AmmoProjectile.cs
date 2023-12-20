@@ -1,7 +1,7 @@
 ﻿namespace ExtendedWeaponry.Components;
 
 [RegisterTypeInIl2Cpp(false)]
-public class AmmoAddon : MonoBehaviour
+public class AmmoProjectile : MonoBehaviour
 {
     internal AmmoType m_AmmoType;
 

@@ -13,65 +13,45 @@ internal class UIPatches
         private static void Postfix(EquipItemPopup __instance)
         {
             GunItem? gunItem = GameManager.GetPlayerManagerComponent().m_ItemInHands?.m_GunItem;
-            if (gunItem == null) return;
+            if (gunItem?.GetComponent<AmmoManager>() is not AmmoManager ammoManager) return;
 
-            AmmoManager ammoManager = gunItem.GetComponent<AmmoManager>();
-            if (ammoManager == null) return;
+            AmmoUtilities.UpdateAmmoSprites(gunItem, __instance.m_ListAmmoSprites);
 
-            UISprite[] ammoSprites = __instance.m_ListAmmoSprites;
-            AmmoUtilities.UpdateAmmoSprites(gunItem, ammoSprites);
-
-            AmmoType prioritizedBulletType = ammoManager.GetNextAmmoType();
-
-            EquipItemPopupAddon equipItemPopupExtension = __instance.GetComponent<EquipItemPopupAddon>();
-            if (equipItemPopupExtension == null) return;
+            if (__instance.GetComponent<EquipItemPopupAddon>() is not EquipItemPopupAddon equipItemPopupExtension) return;
 
             if (ammoWidgetClones.Count == 0)
             {
                 foreach (AmmoType bulletType in Enum.GetValues(typeof(AmmoType)))
                 {
-                    if (bulletType == AmmoType.Unspecified)
+                    __instance.m_LabelAmmoReserve.gameObject.SetActive(bulletType == AmmoType.Unspecified);
+                    if (bulletType == AmmoType.Unspecified || equipItemPopupExtension.m_AmmoWidgetExtensionPrefab is not GameObject prefab) continue;
+
+                    GameObject prefabInstance = UnityEngine.Object.Instantiate(prefab, prefab.transform.parent);
+                    prefabInstance.name = $"AmmoWidgetExtension_{bulletType}";
+
+                    if (prefabInstance.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>() is UILabel labelAmmoCount &&
+                        prefabInstance.transform.Find("Label_AmmoType")?.GetComponent<UILabel>() is UILabel labelAmmoType)
                     {
-                        __instance.m_LabelAmmoReserve.gameObject.SetActive(true);
-                        continue;
-                    }
-                    else
-                    {
-                        GameObject? prefab = equipItemPopupExtension.m_AmmoWidgetExtensionPrefab;
-                        if (prefab == null) continue;
-
-                        GameObject prefabInstance = UnityEngine.Object.Instantiate(prefab, prefab.transform.parent);
-                        prefabInstance.name = $"AmmoWidgetExtension_{bulletType}";
-
-                        UILabel? labelAmmoCount = prefabInstance.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>();
-                        UILabel? labelAmmoType = prefabInstance.transform.Find("Label_AmmoType")?.GetComponent<UILabel>();
-                        if (labelAmmoCount == null || labelAmmoType == null) continue;
-
                         labelAmmoCount.text = AmmoUtilities.GetAmmoCountInInventory(bulletType, gunItem).ToString();
                         labelAmmoType.text = bulletType.ToString();
-
                         ammoWidgetClones[bulletType] = prefabInstance;
-
-                        __instance.m_LabelAmmoReserve.gameObject.SetActive(false);
                     }
                 }
             }
 
+            AmmoType prioritizedBulletType = ammoManager.GetNextAmmoType();
+
             foreach (var pair in ammoWidgetClones)
             {
                 int ammoCount = AmmoUtilities.GetAmmoCountInInventory(pair.Key, gunItem);
-                UILabel? labelAmmoCount = pair.Value.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>();
-                UILabel? labelAmmoType = pair.Value.transform.Find("Label_AmmoType")?.GetComponent<UILabel>();
-
-                if (labelAmmoCount != null)
+                if (pair.Value.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>() is UILabel labelAmmoCount)
                 {
                     labelAmmoCount.text = ammoCount.ToString();
                 }
 
-                if (labelAmmoType != null)
+                if (pair.Value.transform.Find("Label_AmmoType")?.GetComponent<UILabel>() is UILabel labelAmmoType)
                 {
-                    string bulletTypeName = AmmoUtilities.AmmoTypeLocalization(pair.Key);
-                    labelAmmoType.text = $"{bulletTypeName}";
+                    labelAmmoType.text = AmmoUtilities.AmmoTypeLocalization(pair.Key);
                     labelAmmoType.color = AmmoUtilities.AmmoTypeColours(pair.Key);
                 }
 
@@ -85,19 +65,16 @@ internal class UIPatches
     {
         private static void Postfix(ItemDescriptionPage __instance, GearItem gi)
         {
+            __instance.m_ItemNotesLabel.gameObject.SetActive(false);
+
             if (gi.m_AmmoItem)
             {
-                AmmoAddon ammoAddon = gi.GetComponent<AmmoAddon>();
-                if (ammoAddon != null)
+                AmmoProjectile ammoAddon = gi.GetComponent<AmmoProjectile>();
+                if (ammoAddon != null && ammoAddon.m_AmmoType != AmmoType.Unspecified)
                 {
-                    AmmoType ammoType = ammoAddon.m_AmmoType;
                     __instance.m_ItemNotesLabel.gameObject.SetActive(true);
-                    __instance.m_ItemNotesLabel.text = AmmoUtilities.AmmoTypeLocalization(ammoType);
-                    __instance.m_ItemNotesLabel.color = AmmoUtilities.AmmoTypeColours(ammoType);
-                }
-                else
-                {
-                    __instance.m_ItemNotesLabel.gameObject.SetActive(false);
+                    __instance.m_ItemNotesLabel.text = AmmoUtilities.AmmoTypeLocalization(ammoAddon.m_AmmoType);
+                    __instance.m_ItemNotesLabel.color = AmmoUtilities.AmmoTypeColours(ammoAddon.m_AmmoType);
                 }
             }
         }
@@ -113,20 +90,20 @@ internal class UIPatches
 
             if (hudAddon.m_AmmoTypePrefab != null)
             {
+                hudAddon.m_AmmoTypePrefab.SetActive(false);
+
                 if (__instance.m_Gear.m_AmmoItem)
                 {
-                    AmmoAddon ammoAddon = __instance.m_Gear.m_AmmoItem.GetComponent<AmmoAddon>();
-                    if (ammoAddon != null && hudAddon.m_LabelInspectAmmoType != null)
+                    AmmoProjectile ammoAddon = __instance.m_Gear.m_AmmoItem.GetComponent<AmmoProjectile>();
+                    if (ammoAddon != null && ammoAddon.m_AmmoType != AmmoType.Unspecified)
                     {
-                        AmmoType ammoType = ammoAddon.m_AmmoType;
-                        hudAddon.m_LabelInspectAmmoType.text = AmmoUtilities.AmmoTypeLocalization(ammoType);
-                        hudAddon.m_LabelInspectAmmoType.color = AmmoUtilities.AmmoTypeColours(ammoType);
-                        hudAddon.m_AmmoTypePrefab.SetActive(true);
+                        if (hudAddon.m_LabelInspectAmmoType != null)
+                        {
+                            hudAddon.m_LabelInspectAmmoType.text = AmmoUtilities.AmmoTypeLocalization(ammoAddon.m_AmmoType);
+                            hudAddon.m_LabelInspectAmmoType.color = AmmoUtilities.AmmoTypeColours(ammoAddon.m_AmmoType);
+                            hudAddon.m_AmmoTypePrefab.SetActive(true);
+                        }
                     }
-                }
-                else
-                {
-                    hudAddon.m_AmmoTypePrefab.SetActive(false);
                 }
             }
         }

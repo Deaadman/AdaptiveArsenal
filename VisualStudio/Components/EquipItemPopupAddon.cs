@@ -5,10 +5,11 @@ namespace ExtendedWeaponry.Components;
 [RegisterTypeInIl2Cpp(false)]
 public class EquipItemPopupAddon : MonoBehaviour
 {
-    private EquipItemPopup? m_EquipItemPopup;
     internal GameObject? m_AmmoWidgetExtensionPrefab;
     internal UILabel? m_LabelAmmoCount;
     internal UILabel? m_LabelAmmoType;
+
+    private EquipItemPopup? m_EquipItemPopup;
 
     private void Awake()
     {

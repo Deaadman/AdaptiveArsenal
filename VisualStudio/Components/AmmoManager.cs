@@ -6,9 +6,10 @@ namespace ExtendedWeaponry.Components;
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoManager : MonoBehaviour
 {
+    internal List<AmmoType> m_Clip = [];
+
     private AmmoManagerSaveDataProxy m_AmmoManagerSaveDataProxy = new();
     private GunItem? m_GunItem;
-    internal List<AmmoType> m_Clip = [];
     private SaveDataManager m_SaveDataManager = new();
 
     private void Awake()
@@ -65,7 +66,7 @@ public class AmmoManager : MonoBehaviour
 
         foreach (var gearItem in ammoItems)
         {
-            AmmoAddon ammoExtension = gearItem.gameObject.GetComponent<AmmoAddon>();
+            AmmoProjectile ammoExtension = gearItem.gameObject.GetComponent<AmmoProjectile>();
             if (ammoExtension != null)
             {
                 return ammoExtension.m_AmmoType;
