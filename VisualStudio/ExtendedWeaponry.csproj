@@ -38,6 +38,7 @@
 		<!-- Uncomment whatever is required for your needs. -->
 		<!-- <PackageReference Include="STBlade.Modding.TLD.CraftingRevisions" Version="2.2.1" /> -->
 		<!-- <PackageReference Include="STBlade.Modding.TLD.GearSpawner" Version="2.3.1" /> -->
+		<PackageReference Include="ds5678.Modding.Unity.KeyboardUtilities" Version="2.0.0" />
 		<PackageReference Include="STBlade.Modding.TLD.LocalizationUtilities" Version="2.0.0" />
 		<!-- <PackageReference Include="STBlade.Modding.TLD.ModComponent" Version="6.2.3" /> -->
 		<PackageReference Include="STBlade.Modding.TLD.ModData" Version="1.5.1" />
@@ -61,6 +62,7 @@
 		<!-- Uncomment whatever is required for your needs. -->
 		<!-- <Using Include="CraftingRevisions" /> -->
 		<!-- <Using Include="GearSpawner" /> -->
+		<Using Include="KeyboardUtilities"/>
 		<Using Include="LocalizationUtilities" />
 		<Using Include="ModComponent" />
 		<Using Include="ModData" />

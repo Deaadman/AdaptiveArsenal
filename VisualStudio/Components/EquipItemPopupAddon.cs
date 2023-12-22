@@ -5,7 +5,6 @@ namespace ExtendedWeaponry.Components;
 [RegisterTypeInIl2Cpp(false)]
 public class EquipItemPopupAddon : MonoBehaviour
 {
-    internal GameObject? m_AmmoWidgetExtensionPrefab;
     internal UILabel? m_LabelAmmoCount;
     internal UILabel? m_LabelAmmoType;
 
@@ -21,8 +20,6 @@ public class EquipItemPopupAddon : MonoBehaviour
 
         if (widgetInstance != null)
         {
-            m_AmmoWidgetExtensionPrefab = widgetInstance;
-            m_AmmoWidgetExtensionPrefab.SetActive(false);
             m_LabelAmmoCount = widgetInstance.transform.Find("Label_AmmoCount")?.GetComponent<UILabel>();
             m_LabelAmmoType = widgetInstance.transform.Find("Label_AmmoType")?.GetComponent<UILabel>();
         }

@@ -1,5 +1,4 @@
 ﻿using ExtendedWeaponry.Utilities;
-using Il2CppInterop.Runtime.Attributes;
 
 namespace ExtendedWeaponry.Components;
 
@@ -7,94 +6,84 @@ namespace ExtendedWeaponry.Components;
 public class AmmoManager : MonoBehaviour
 {
     internal List<AmmoType> m_Clip = [];
+    internal static AmmoType m_SelectedAmmoType;
 
-    private AmmoManagerSaveDataProxy m_AmmoManagerSaveDataProxy = new();
+    //private AmmoManagerSaveDataProxy m_AmmoManagerSaveDataProxy = new();
     private GunItem? m_GunItem;
-    private SaveDataManager m_SaveDataManager = new();
+    private readonly DataManager m_DataManager = new();
 
-    private void Awake()
-    {
-        m_GunItem = GetComponent<GunItem>();
-    }
+    private void Awake() => m_GunItem = GetComponent<GunItem>();
 
-    internal void AddRoundsToClip(AmmoType bulletType)
+    internal void AddRoundsToClip(AmmoType ammoType, int count)
     {
-        if (m_GunItem != null && m_Clip.Count < m_GunItem.m_ClipSize)
+        for (int i = 0; i < count; i++)
         {
-            m_Clip.Add(bulletType);
+            m_Clip.Add(ammoType);
         }
     }
 
-    internal void Deserialize()
-    {
-        var loadedData = m_SaveDataManager.Load();
-        if (loadedData != null)
-        {
-            m_AmmoManagerSaveDataProxy = loadedData;
-            m_Clip = m_AmmoManagerSaveDataProxy.m_Clip ?? [];
-        }
-    }
-
-    internal int GetLoadedAmmoCount()
-    {
-        return m_Clip.Count;
-    }
-
-    internal AmmoType GetNextAmmoType()
+    internal static int CalculateAmmoAvailableForType()
     {
         Inventory inventory = GameManager.GetInventoryComponent();
-        if (inventory == null)
-        {
-            Logging.LogError("Inventory component not found.");
-            return AmmoType.Unspecified;
-        }
+        if (inventory == null) return 0;
 
-        if (m_GunItem == null)
+        int totalAmmo = 0;
+        foreach (var item in inventory.m_Items)
         {
-            Logging.LogError("GunItem component not found on AmmoManager.");
-            return AmmoType.Unspecified;
-        }
-
-        Il2CppSystem.Collections.Generic.List<GearItem> ammoItems = new();
-        foreach (var gearItem in inventory.m_Items)
-        {
-            if (AmmoUtilities.IsValidAmmoType(gearItem, m_GunItem.m_GearItem))
+            if (item.m_GearItem?.m_AmmoItem is AmmoItem ammoItem)
             {
-                ammoItems.Add(gearItem);
+                AmmoProjectile ammoProjectile = ammoItem.GetComponent<AmmoProjectile>();
+                if (ammoProjectile?.m_AmmoType == m_SelectedAmmoType)
+                {
+                    totalAmmo += item.m_GearItem.m_StackableItem.m_Units;
+                }
             }
         }
 
-        foreach (var gearItem in ammoItems)
-        {
-            AmmoProjectile ammoExtension = gearItem.gameObject.GetComponent<AmmoProjectile>();
-            if (ammoExtension != null)
-            {
-                return ammoExtension.m_AmmoType;
-            }
-        }
+        return totalAmmo;
+    }
 
-        return AmmoType.Unspecified;
-    } 
+    //internal void Deserialize()
+    //{
+    //    var loadedData = m_DataManager.Load();
+    //    if (loadedData != null)
+    //    {
+    //        m_AmmoManagerSaveDataProxy = loadedData;
+    //        m_Clip = m_AmmoManagerSaveDataProxy.m_Clip ?? [];
+    //    }
+    //}
 
-    [HideFromIl2Cpp]
-    internal bool RemoveAmmoFromClip(out AmmoType bulletType)
+    internal AmmoType? RemoveNextFromClip()
     {
         if (m_Clip.Count > 0)
         {
-            bulletType = m_Clip[0];
+            AmmoType removedAmmo = m_Clip[0];
             m_Clip.RemoveAt(0);
-            return true;
+            return removedAmmo;
         }
-        else
-        {
-            bulletType = AmmoType.Unspecified;
-            return false;
-        }
+
+        return null;
     }
 
-    internal void Serialize()
+    //internal void Serialize()
+    //{
+    //    m_AmmoManagerSaveDataProxy.m_Clip = m_Clip;
+    //    m_DataManager.Save(m_AmmoManagerSaveDataProxy);
+    //}
+
+    private static void SwitchAmmoType()
     {
-        m_AmmoManagerSaveDataProxy.m_Clip = m_Clip;
-        m_SaveDataManager.Save(m_AmmoManagerSaveDataProxy);
+        AmmoType[] ammoTypes = (AmmoType[])Enum.GetValues(typeof(AmmoType));
+        int currentIndex = Array.IndexOf(ammoTypes, m_SelectedAmmoType);
+        currentIndex = (currentIndex + 1) % ammoTypes.Length;
+        m_SelectedAmmoType = ammoTypes[currentIndex];
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            SwitchAmmoType();
+        }
     }
 }

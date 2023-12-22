@@ -2,7 +2,6 @@
 
 internal enum AmmoType
 {
-    Unspecified,
     FullMetalJacket,
-    ArmorPiercing
+    ArmorPiercing    
 }

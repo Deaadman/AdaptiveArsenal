@@ -3,9 +3,9 @@ using System.Text.Json;
 
 namespace ExtendedWeaponry.Utilities;
 
-internal class SaveDataManager
+internal class DataManager
 {
-    ModDataManager modDataManager = new("Extended Weaponry", true);
+    readonly ModDataManager modDataManager = new("Extended Weaponry", true);
 
     public void Save(AmmoManagerSaveDataProxy data)
     {

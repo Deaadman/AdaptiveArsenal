@@ -4,48 +4,19 @@ namespace ExtendedWeaponry.Utilities;
 
 internal class AmmoUtilities
 {
-    internal static Color AmmoTypeColours(AmmoType ammoType)
+    internal static Color AmmoTypeColours(AmmoType ammoType) => ammoType switch
     {
-        return ammoType switch
-        {
-            AmmoType.ArmorPiercing => Color.green,
-            AmmoType.FullMetalJacket => Color.yellow,
-            AmmoType.Unspecified => Color.white,
-            _ => Color.white,
-        };
-    }
+        AmmoType.FullMetalJacket => Color.yellow,
+        AmmoType.ArmorPiercing => Color.green,
+        _ => Color.white,
+    };
 
-    internal static string AmmoTypeLocalization(AmmoType ammoType)
+    internal static string AmmoTypeLocalization(AmmoType ammoType) => ammoType switch
     {
-        return ammoType switch
-        {
-            AmmoType.ArmorPiercing => Localization.Get("GAMEPLAY_ArmorPiercing"),
-            AmmoType.FullMetalJacket => Localization.Get("GAMEPLAY_FullMetalJacket"),
-            _ => ammoType.ToString(),
-        };
-    }
-
-    internal static int GetAmmoCountInInventory(AmmoType ammoType, GunItem gunItem)
-    {
-        Inventory inventory = GameManager.GetInventoryComponent();
-        if (inventory == null) return 0;
-
-        int count = 0;
-        foreach (var gearItemObject in inventory.m_Items)
-        {
-            GearItem gearItem = gearItemObject;
-            if (gearItem != null && IsValidAmmoType(gearItem, gunItem.m_GearItem))
-            {
-                AmmoProjectile ammoExtension = gearItem.gameObject.GetComponent<AmmoProjectile>();
-                if (ammoExtension != null && ammoExtension.m_AmmoType == ammoType)
-                {
-                    count += gearItem.m_StackableItem.m_Units;
-                }
-            }
-        }
-
-        return count;
-    }
+        AmmoType.FullMetalJacket => Localization.Get("GAMEPLAY_FullMetalJacket"),
+        AmmoType.ArmorPiercing => Localization.Get("GAMEPLAY_ArmorPiercing"),
+        _ => ammoType.ToString(),
+    };
 
     internal static Material? GetMaterialForAmmoType(AmmoType ammoType)
     {
@@ -67,32 +38,15 @@ internal class AmmoUtilities
     {
         return ammoType switch
         {
-            AmmoType.ArmorPiercing => "GEAR_RifleAmmoSingleAP",
             AmmoType.FullMetalJacket => "GEAR_RifleAmmoSingle",
+            AmmoType.ArmorPiercing => "GEAR_RifleAmmoSingleAP",
             _ => null,
         };
     }
 
-    internal static bool IsValidAmmoType(GearItem gearItem, GearItem weapon)
-    {
-        if (gearItem == null || weapon == null) return false;
-        return gearItem.m_AmmoItem && gearItem.m_StackableItem && gearItem.GetRoundedCondition() != 0 && gearItem.m_AmmoItem.m_AmmoForGunType == weapon.m_GunItem.m_GunType;
-    }
-
-    internal static void PrioritizeBulletType(GearItem gearItem, Dictionary<AmmoType, int> ammoTypeCounts)
-    {
-        AmmoProjectile ammoExtension = gearItem.GetComponent<AmmoProjectile>();
-        if (ammoExtension != null)
-        {
-            AmmoType ammoType = ammoExtension.m_AmmoType;
-            ammoTypeCounts.TryGetValue(ammoType, out int currentCount);
-            ammoTypeCounts[ammoType] = currentCount + gearItem.m_StackableItem.m_Units;
-        }
-    }
-
     internal static void UpdateAmmoMaterials(Transform meshesTransform, AmmoManager ammoManager, Material nextAmmoMaterial)
     {
-        int loadedBullets = ammoManager.GetLoadedAmmoCount();
+        int loadedBullets = ammoManager.m_Clip.Count;
         string ammoMeshName = loadedBullets == 1 ? "mesh_bullet_a" : "mesh_bullet_b";
         TextureSwapper.SwapMaterial(meshesTransform, ammoMeshName, nextAmmoMaterial);
         TextureSwapper.SwapMaterial(meshesTransform, "mesh_StripperClipBullets", nextAmmoMaterial);
