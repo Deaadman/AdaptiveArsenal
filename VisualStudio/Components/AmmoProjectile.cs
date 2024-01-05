@@ -7,14 +7,14 @@ public class AmmoProjectile : MonoBehaviour
 
     private void Awake()
     {
-        GearItem gearItem = GetComponent<GearItem>();
-        if (gearItem != null)
+        AmmoItem ammoItem = GetComponent<AmmoItem>();
+        if (ammoItem != null)
         {
-            if (gameObject.name.Contains("GEAR_RifleAmmoSingleAP") || gameObject.name.Contains("GEAR_RifleAmmoBoxAP"))
+            if (gameObject.name.StartsWith("GEAR_RifleAmmoSingleAP") || gameObject.name.StartsWith("GEAR_RifleAmmoBoxAP"))
             {
                 m_AmmoType = AmmoType.ArmorPiercing;
             }
-            else if (gameObject.name.Contains("GEAR_RevolverAmmoSingle") || gameObject.name.Contains("GEAR_RifleAmmoSingle") || gameObject.name.Contains("GEAR_RevolverAmmoBox") || gameObject.name.Contains("GEAR_RifleAmmoBox"))
+            else if (gameObject.name.StartsWith("GEAR_RevolverAmmoSingle") || gameObject.name.StartsWith("GEAR_RifleAmmoSingle") || gameObject.name.StartsWith("GEAR_RevolverAmmoBox") || gameObject.name.StartsWith("GEAR_RifleAmmoBox"))
             {
                 m_AmmoType = AmmoType.FullMetalJacket;
             }

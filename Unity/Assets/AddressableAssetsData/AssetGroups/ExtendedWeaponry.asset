@@ -37,6 +37,10 @@ MonoBehaviour:
     m_Address: GEAR_RifleAmmoBoxAP
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 89faee95182c348419f7c13a303ba945
+    m_Address: GEAR_RifleV2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 4397a97268bd2a345a62428f685b8d9c, type: 2}
   m_SchemaSet:

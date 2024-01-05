@@ -26,7 +26,7 @@ internal static class BuildInfo
     public const string DownloadLink                    = null;
     /// <summary>Copyright info</summary>
     /// <remarks>When updating the year, use the StartYear-CurrentYear format</remarks>
-    public const string Copyright                       = "Copyright © 2023";
+    public const string Copyright                       = "Copyright © 2024";
     /// <summary>Trademark info</summary>
     public const string Trademark                       = null;
     /// <summary>Product Name (Generally use the Name)</summary>

@@ -1,5 +1,7 @@
 ﻿using ExtendedWeaponry.Components;
 using ExtendedWeaponry.Utilities;
+using Il2CppNodeCanvas.BehaviourTrees;
+using static Il2Cpp.UITweener;
 
 namespace ExtendedWeaponry.Patches;
 
@@ -28,13 +30,15 @@ internal class GunPatches
     [HarmonyPatch(typeof(Inventory), nameof(Inventory.GetAmmoAvailableForWeapon), new Type[] { typeof(GearItem) })]
     internal static class AmmoTypePriority
     {
-        private static void Postfix(ref int __result, GearItem weapon)
+        private static bool Prefix(ref int __result, GearItem weapon)
         {
-            AmmoManager ammoManager = weapon.GetComponent<AmmoManager>();
+            AmmoManager ammoManager = weapon.m_GunItem.GetComponent<AmmoManager>();
             if (ammoManager != null)
             {
                 __result = AmmoManager.CalculateAmmoAvailableForType();
+                return false;
             }
+            return true;
         }
     }
 

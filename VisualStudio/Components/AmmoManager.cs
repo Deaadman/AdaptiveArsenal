@@ -30,9 +30,9 @@ public class AmmoManager : MonoBehaviour
         int totalAmmo = 0;
         foreach (var item in inventory.m_Items)
         {
-            if (item.m_GearItem?.m_AmmoItem is AmmoItem ammoItem)
+            if (item.m_GearItem.m_AmmoItem)
             {
-                AmmoProjectile ammoProjectile = ammoItem.GetComponent<AmmoProjectile>();
+                AmmoProjectile ammoProjectile = item.m_GearItem.m_AmmoItem.GetComponent<AmmoProjectile>();
                 if (ammoProjectile?.m_AmmoType == m_SelectedAmmoType)
                 {
                     totalAmmo += item.m_GearItem.m_StackableItem.m_Units;

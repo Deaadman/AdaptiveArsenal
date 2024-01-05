@@ -13,7 +13,7 @@
 	<PropertyGroup>
 		<!-- This should point to wherever your games primary EXE is -->
 		<TheLongDarkPath>C:\Program Files (x86)\Steam\steamapps\common\TheLongDark</TheLongDarkPath>
-		<ReleaseFolderPath>E:\The Long Dark\Mods\Maintained\ExtendedWeaponry\Release</ReleaseFolderPath>
+		<ReleaseFolderPath>D:\Personal Projects\The Long Dark\Mods\Maintained\ExtendedWeaponry\Release</ReleaseFolderPath>
 		<FileVersion></FileVersion>
 		<AssemblyVersion></AssemblyVersion>
 	</PropertyGroup>
@@ -46,7 +46,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="ModComponent">
-	    <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TheLongDark\Mods\ModComponent.dll</HintPath>
+	    <HintPath>..\..\..\Forked\ModComponent\ModComponent\obj\Release\net6.0\ModComponent.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 
@@ -62,7 +62,7 @@
 		<!-- Uncomment whatever is required for your needs. -->
 		<!-- <Using Include="CraftingRevisions" /> -->
 		<!-- <Using Include="GearSpawner" /> -->
-		<Using Include="KeyboardUtilities"/>
+		<Using Include="KeyboardUtilities" />
 		<Using Include="LocalizationUtilities" />
 		<Using Include="ModComponent" />
 		<Using Include="ModData" />
