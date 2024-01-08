@@ -1,75 +1,88 @@
-using ExtendedWeaponry.Utilities;
+using UnityEngine.AddressableAssets;
 
 namespace ExtendedWeaponry;
 
 internal sealed class Mod : MelonMod
 {
-    public override void OnInitializeMelon()
+    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Awake))]
+    private static class SwapCustomProjectiles
     {
-        LoadLocalizations();
-    }
-
-    private static void LoadLocalizations()
-    {
-        const string JSONfile = "ExtendedWeaponry.Resources.Localization.json";
-
-        try
+        private static void Prefix(vp_FPSShooter __instance)
         {
-            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(JSONfile) ?? throw new InvalidOperationException($"Failed to load resource: {JSONfile}");
-            using StreamReader reader = new(stream);
-
-            string results = reader.ReadToEnd();
-
-            LocalizationManager.LoadJsonLocalization(results);
-        }
-        catch (Exception ex)
-        {
-            Logging.LogError(ex.Message);
-        }
-    }
-
-    [HarmonyPatch(typeof(vp_Bullet), nameof(vp_Bullet.SpawnImpactEffects))]
-    private static class LogBulletData
-    {
-        private static bool Prefix(vp_Bullet __instance, RaycastHit hit)
-        {
-            Vector3 playerPosition = GameManager.GetVpFPSPlayer().transform.position;
-            Vector3 collisionPoint = hit.point;
-            float distance = Vector3.Distance(playerPosition, collisionPoint);
-
-            WeaponSource weaponType = ConvertGunTypeToWeaponSource(__instance.m_GunType);
-            BodyDamage bodyDamage = hit.collider.GetComponentInParent<BodyDamage>();
-
-            if (bodyDamage != null)
+            if (__instance.gameObject.name.Contains("Rifle"))
             {
-                LocalizedDamage localizedDamage = hit.collider.GetComponent<LocalizedDamage>();
-                if (localizedDamage != null)
+                GameObject newProjectilePrefab = Addressables.LoadAsset<GameObject>("GEAR_RifleAmmoSingle").WaitForCompletion();
+                if (newProjectilePrefab != null)
                 {
-                    BodyPart hitBodyPart = localizedDamage.m_BodyPart;
-                    float damageScale = bodyDamage.GetDamageScale(hitBodyPart, weaponType);
-                    float originalDamage = __instance.Damage;
-                    float actualDamage = originalDamage * damageScale;
-
-                    Logging.Log($"Bullet Impact Detected. Body Part: {hitBodyPart}, Distance: {distance}, Original Damage: {originalDamage}, Damage Multiplier: {damageScale}, Actual Damage: {actualDamage}");
+                    _ = newProjectilePrefab.GetComponent<AmmoProjectile>() ?? newProjectilePrefab.AddComponent<AmmoProjectile>();
+                    __instance.ProjectileCustomPrefab = true;
+                    __instance.ProjectilePrefab = newProjectilePrefab;
                 }
             }
-            else
-            {
-                Logging.Log($"Bullet Impact Detected. Distance: {distance}, but BodyDamage component not found on collider's parent.");
-            }
-
-            return true;
         }
+    }
 
-        private static WeaponSource ConvertGunTypeToWeaponSource(GunType gunType)
+    [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Fire))] // First shot, shoots down and towards the left?
+    private static class FireCustomProjectile
+    {
+        private static void Prefix(vp_FPSShooter __instance)
         {
-            return gunType switch
+            if (Time.time < __instance.m_NextAllowedFireTime)
             {
-                GunType.Rifle => WeaponSource.Rifle,
-                GunType.Revolver => WeaponSource.Revolver,
-                GunType.FlareGun => WeaponSource.FlareGun,
-                _ => WeaponSource.Unspecified,
-            };
+                return;
+            }
+            if (__instance.m_Weapon.ReloadInProgress())
+            {
+                return;
+            }
+            if (!GameManager.GetPlayerAnimationComponent().IsAllowedToFire(__instance.m_Weapon.m_GunItem.m_AllowHipFire))
+            {
+                return;
+            }
+            if (GameManager.GetPlayerAnimationComponent().IsReloading())
+            {
+                return;
+            }
+            if (__instance.m_Weapon.GetAmmoCount() < 1)
+            {
+                return;
+            }
+            Transform transform = null;
+            Transform transform2 = null;
+            Camera weaponCamera = __instance.m_Camera.GetWeaponCamera();
+            Camera mainCamera = GameManager.GetMainCamera();
+            Vector3 vector = __instance.m_Camera.transform.position;
+            Quaternion quaternion = __instance.m_Camera.transform.rotation;
+            if (transform != null && transform2 != null)
+            {
+                Vector3 vector2 = weaponCamera.WorldToScreenPoint(transform.position);
+                Vector3 vector3 = weaponCamera.WorldToScreenPoint(transform2.position);
+                Vector3 vector4 = mainCamera.ScreenToWorldPoint(vector2);
+                Vector3 vector5 = mainCamera.ScreenToWorldPoint(vector3);
+                Vector3 vector6 = Vector3.Normalize(vector4 - vector5);
+                vector = vector4;
+                quaternion = Quaternion.LookRotation(vector6, Vector3.up);
+                Vector3 vector7 = vector6;
+                vector = PlayerManager.MaybeAdjustShotPositionForNearShot(transform.position, vector, vector7);
+            }
+            else if (__instance.BulletEmissionLocator != null)
+            {
+                Vector3 vector8 = weaponCamera.WorldToScreenPoint(__instance.BulletEmissionLocator.transform.position);
+                Vector3 vector9 = weaponCamera.WorldToScreenPoint(__instance.BulletEmissionLocator.transform.position + __instance.BulletEmissionLocator.transform.forward);
+                Vector3 vector10 = mainCamera.ScreenToWorldPoint(vector8);
+                Vector3 vector11 = Vector3.Normalize(mainCamera.ScreenToWorldPoint(vector9) - vector10);
+                vector = vector10;
+                quaternion = Quaternion.LookRotation(vector11, Vector3.up);
+                Vector3 vector12 = vector11;
+                vector = PlayerManager.MaybeAdjustShotPositionForNearShot(__instance.BulletEmissionLocator.transform.position, vector, vector12);
+            }
+            if (__instance.ProjectileCustomPrefab)
+            {
+                if (__instance.ProjectilePrefab.GetComponent<AmmoProjectile>() != null)
+                {
+                    AmmoProjectile.SpawnAndFire(__instance.ProjectilePrefab, vector, quaternion);
+                }
+            }
         }
     }
 }
