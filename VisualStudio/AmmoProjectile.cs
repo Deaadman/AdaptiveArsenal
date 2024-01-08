@@ -6,6 +6,8 @@ namespace ExtendedWeaponry;
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoProjectile : MonoBehaviour
 {
+    private AmmoItem m_AmmoItem;
+    private GunType m_GunType;
     private Rigidbody m_Rigidbody;
     private LineRenderer m_LineRenderer;
     private List<Vector3> trajectoryPoints = [];
@@ -17,18 +19,22 @@ public class AmmoProjectile : MonoBehaviour
         m_Rigidbody = GetComponent<Rigidbody>();
         m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
+        m_AmmoItem = GetComponent<AmmoItem>();
+        m_GunType = m_AmmoItem.m_AmmoForGunType;
+        
+        InitializeLineRenderer();
+        InitializeWindEffect();
+    }
+
+    private void InitializeLineRenderer()
+    {
         GameObject lineRendererObject = new("LineRenderer");
         lineRendererObject.transform.SetParent(transform);
         lineRendererObject.transform.localPosition = Vector3.zero;
         lineRendererObject.transform.localRotation = Quaternion.identity;
 
         m_LineRenderer = lineRendererObject.AddComponent<LineRenderer>();
-        ConfigureLineRenderer();
-        InitializeWindEffect();
-    }
 
-    private void ConfigureLineRenderer()
-    {
         m_LineRenderer.startWidth = 0.05f;
         m_LineRenderer.endWidth = 0.05f;
     }
@@ -46,9 +52,16 @@ public class AmmoProjectile : MonoBehaviour
         Vector3 initialForce = transform.forward * 100 + windEffect;
         m_Rigidbody.AddForce(initialForce, ForceMode.VelocityChange);
 
-        //m_Rigidbody.AddForce(transform.forward * 100, ForceMode.VelocityChange);
-
         startPosition = transform.position;
+
+        if (m_GunType == GunType.Rifle)
+        {
+            StatsManager.IncrementValue(StatID.RifleShot, 1f);
+        }
+        else if (m_GunType == GunType.Revolver)
+        {
+            StatsManager.IncrementValue(StatID.RevolverShot, 1f);
+        }
     }
 
     private BaseAi InflictDamage(GameObject victim, string collider)
@@ -66,10 +79,22 @@ public class AmmoProjectile : MonoBehaviour
         {
             return null;
         }
+
         LocalizedDamage component = victim.GetComponent<LocalizedDamage>();
-        StatsManager.IncrementValue(StatID.SuccessfulHits_Rifle, 1f);
-        float bleedOutMinutes = component.GetBleedOutMinutes(WeaponSource.Rifle);
-        float damage = 100 * component.GetDamageScale(WeaponSource.Rifle);
+
+        if (m_GunType == GunType.Rifle)
+        {
+            StatsManager.IncrementValue(StatID.SuccessfulHits_Rifle, 1f);
+        }
+        else if (m_GunType == GunType.Revolver)
+        {
+            StatsManager.IncrementValue(StatID.SuccessfulHits_Revolver, 1f);
+        }
+
+        WeaponSource weapon = m_GunType.ToWeaponSource();
+
+        float bleedOutMinutes = component.GetBleedOutMinutes(weapon);
+        float damage = 100 * component.GetDamageScale(weapon);
 
         Logging.Log($"Damage: {damage}, Bleedout Minutes: {bleedOutMinutes}, Body Part: {component.m_BodyPart}");
 
@@ -79,7 +104,14 @@ public class AmmoProjectile : MonoBehaviour
         }
         if (baseAi.GetAiMode() != AiMode.Dead)
         {
-            GameManager.GetSkillsManager().IncrementPointsAndNotify(SkillType.Rifle, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox);
+            if (m_GunType == GunType.Rifle)
+            {
+                GameManager.GetSkillsManager().IncrementPointsAndNotify(SkillType.Rifle, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox);
+            }
+            else if (m_GunType == GunType.Revolver)
+            {
+                GameManager.GetSkillsManager().IncrementPointsAndNotify(SkillType.Revolver, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox);
+            }
         }
         baseAi.SetupDamageForAnim(transform.position, GameManager.GetPlayerTransform().position, component);
         baseAi.ApplyDamage(damage, bleedOutMinutes, DamageSource.Player, collider);

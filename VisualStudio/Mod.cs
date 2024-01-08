@@ -19,6 +19,16 @@ internal sealed class Mod : MelonMod
                     __instance.ProjectilePrefab = newProjectilePrefab;
                 }
             }
+            if (__instance.gameObject.name.Contains("Revolver"))
+            {
+                GameObject newProjectilePrefab = Addressables.LoadAsset<GameObject>("GEAR_RevolverAmmoSingle").WaitForCompletion();
+                if (newProjectilePrefab != null)
+                {
+                    _ = newProjectilePrefab.GetComponent<AmmoProjectile>() ?? newProjectilePrefab.AddComponent<AmmoProjectile>();
+                    __instance.ProjectileCustomPrefab = true;
+                    __instance.ProjectilePrefab = newProjectilePrefab;
+                }
+            }
         }
     }
 
