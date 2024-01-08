@@ -6,50 +6,58 @@ namespace ExtendedWeaponry;
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoProjectile : MonoBehaviour
 {
+    #region References
     private AmmoItem m_AmmoItem;
+    private GunExtension m_GunExtension;
     private GunType m_GunType;
-    private Rigidbody m_Rigidbody;
     private LineRenderer m_LineRenderer;
-    private List<Vector3> trajectoryPoints = [];
+    private Rigidbody m_Rigidbody;
+    #endregion
+
+    #region Adjustable Values
+    /// <summary>
+    /// Adjusts the scale of the muzzle velocity for guns.
+    /// </summary>
+    private readonly float m_ScaleFactor = 0.15f;
+    #endregion
+
+    #region Other
+    private readonly List<Vector3> trajectoryPoints = [];
     private Vector3 startPosition;
     private Vector3 windEffect;
+    #endregion
 
     void Awake()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
-        m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         m_AmmoItem = GetComponent<AmmoItem>();
         m_GunType = m_AmmoItem.m_AmmoForGunType;
-        
+
+        m_GunExtension = GameManager.GetPlayerManagerComponent().m_ItemInHands.GetComponent<GunExtension>();
+        Logging.Log($"Gun Equipped = {GameManager.GetPlayerManagerComponent().m_ItemInHands.gameObject.name} | Muzzle Velocity = {m_GunExtension.m_MuzzleVelocity}");
+
         InitializeLineRenderer();
         InitializeWindEffect();
     }
 
-    private void InitializeLineRenderer()
+    void InitializeLineRenderer()
     {
-        GameObject lineRendererObject = new("LineRenderer");
-        lineRendererObject.transform.SetParent(transform);
-        lineRendererObject.transform.localPosition = Vector3.zero;
-        lineRendererObject.transform.localRotation = Quaternion.identity;
-
-        m_LineRenderer = lineRendererObject.AddComponent<LineRenderer>();
-
-        m_LineRenderer.startWidth = 0.05f;
-        m_LineRenderer.endWidth = 0.05f;
+        m_LineRenderer = gameObject.AddComponent<LineRenderer>();
+        m_LineRenderer.startWidth = m_LineRenderer.endWidth = 0.05f;
     }
 
     void Fire()
     {
         Utils.SetIsKinematic(m_Rigidbody, false);
         transform.parent = null;
-        m_Rigidbody.velocity = Vector3.zero;
-        m_Rigidbody.mass = 0.2f;
-        m_Rigidbody.drag = 0.3f;
-        m_Rigidbody.angularDrag = 0.2f;
-        m_Rigidbody.centerOfMass = new Vector3(0, 0, 0.0385f);
 
-        Vector3 initialForce = transform.forward * 100 + windEffect;
+        m_Rigidbody.velocity = Vector3.zero;
+        m_Rigidbody.mass = 0.02f;
+        m_Rigidbody.drag = 0.1f;
+
+        Vector3 initialForce = transform.forward * (m_GunExtension.m_MuzzleVelocity * m_ScaleFactor) + windEffect;
         m_Rigidbody.AddForce(initialForce, ForceMode.VelocityChange);
 
         startPosition = transform.position;
@@ -64,7 +72,7 @@ public class AmmoProjectile : MonoBehaviour
         }
     }
 
-    private BaseAi InflictDamage(GameObject victim, string collider)
+    BaseAi InflictDamage(GameObject victim, string collider)
     {
         BaseAi baseAi = null;
         if (victim.layer == 16)
@@ -118,7 +126,7 @@ public class AmmoProjectile : MonoBehaviour
         return baseAi;
     }
 
-    private void InitializeWindEffect()
+    void InitializeWindEffect()
     {
         Wind windComponent = GameManager.GetWindComponent();
         if (windComponent != null)

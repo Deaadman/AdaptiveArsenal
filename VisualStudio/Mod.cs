@@ -4,6 +4,18 @@ namespace ExtendedWeaponry;
 
 internal sealed class Mod : MelonMod
 {
+    [HarmonyPatch(typeof(GearItem), nameof(GearItem.Awake))]
+    private static class ApplyComponents
+    {
+        private static void Postfix(GearItem __instance)
+        {
+            if (__instance.GetComponent<GunItem>() != null)
+            {
+                _ = __instance.gameObject.GetComponent<GunExtension>() ?? __instance.gameObject.AddComponent<GunExtension>();
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Awake))]
     private static class SwapCustomProjectiles
     {
@@ -57,25 +69,11 @@ internal sealed class Mod : MelonMod
             {
                 return;
             }
-            Transform transform = null;
-            Transform transform2 = null;
             Camera weaponCamera = __instance.m_Camera.GetWeaponCamera();
             Camera mainCamera = GameManager.GetMainCamera();
             Vector3 vector = __instance.m_Camera.transform.position;
             Quaternion quaternion = __instance.m_Camera.transform.rotation;
-            if (transform != null && transform2 != null)
-            {
-                Vector3 vector2 = weaponCamera.WorldToScreenPoint(transform.position);
-                Vector3 vector3 = weaponCamera.WorldToScreenPoint(transform2.position);
-                Vector3 vector4 = mainCamera.ScreenToWorldPoint(vector2);
-                Vector3 vector5 = mainCamera.ScreenToWorldPoint(vector3);
-                Vector3 vector6 = Vector3.Normalize(vector4 - vector5);
-                vector = vector4;
-                quaternion = Quaternion.LookRotation(vector6, Vector3.up);
-                Vector3 vector7 = vector6;
-                vector = PlayerManager.MaybeAdjustShotPositionForNearShot(transform.position, vector, vector7);
-            }
-            else if (__instance.BulletEmissionLocator != null)
+            if (__instance.BulletEmissionLocator != null)
             {
                 Vector3 vector8 = weaponCamera.WorldToScreenPoint(__instance.BulletEmissionLocator.transform.position);
                 Vector3 vector9 = weaponCamera.WorldToScreenPoint(__instance.BulletEmissionLocator.transform.position + __instance.BulletEmissionLocator.transform.forward);
