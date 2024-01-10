@@ -2,12 +2,12 @@
 
 namespace ExtendedWeaponry;
 
-internal class InitializeComponents
+class InitializeComponents
 {
     [HarmonyPatch(typeof(GearItem), nameof(GearItem.Awake))]
-    private static class ApplyGunExtensionComponent
+    static class ApplyGunExtensionComponent
     {
-        private static void Postfix(GearItem __instance)
+        static void Postfix(GearItem __instance)
         {
             if (__instance.GetComponent<GunItem>() != null)
             {
@@ -17,9 +17,9 @@ internal class InitializeComponents
     }
 
     [HarmonyPatch(typeof(vp_FPSShooter), nameof(vp_FPSShooter.Awake))]
-    private static class SwapRaycastsToProjectiles
+    static class SwapRaycastsToProjectiles
     {
-        private static void Prefix(vp_FPSShooter __instance)
+        static void Prefix(vp_FPSShooter __instance)
         {
             string? gearItem = null;
 

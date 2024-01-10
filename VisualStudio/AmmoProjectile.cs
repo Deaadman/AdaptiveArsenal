@@ -7,11 +7,13 @@ namespace ExtendedWeaponry;
 public class AmmoProjectile : MonoBehaviour
 {
     #region References
+#nullable disable
     private AmmoItem m_AmmoItem;
     private GunExtension m_GunExtension;
     private GunType m_GunType;
     private LineRenderer m_LineRenderer;
     private Rigidbody m_Rigidbody;
+#nullable enable
     #endregion
 
     #region Adjustable Values
@@ -32,7 +34,7 @@ public class AmmoProjectile : MonoBehaviour
     #endregion
 
     #region Other
-    private readonly List<Vector3> trajectoryPoints = [];
+    private readonly List<Vector3> m_TrajectoryPoints = [];
     private Vector3 m_WindEffect;
     #endregion
 
@@ -41,11 +43,25 @@ public class AmmoProjectile : MonoBehaviour
     void ConfigureComponents()
     {
         m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
         m_GunType = m_AmmoItem.m_AmmoForGunType;
 
-        m_LineRenderer = gameObject.AddComponent<LineRenderer>();
-        m_LineRenderer.startWidth = m_LineRenderer.endWidth = 0.05f;
+        Material? fxArrowTrailMaterial = TextureSwapper.GetLineRendererMaterialFromGearItemPrefab("GEAR_Arrow", "LineRenderer");
+        if (fxArrowTrailMaterial != null)
+        {
+            GameObject lineRendererObject = new("LineRenderer");
+            lineRendererObject.transform.parent = transform;
+
+            m_LineRenderer = lineRendererObject.AddComponent<LineRenderer>();
+            m_LineRenderer.material = fxArrowTrailMaterial;
+            m_LineRenderer.startWidth = m_LineRenderer.endWidth = 0.1f;
+
+            Gradient gradient = new();
+            gradient.SetKeys(
+                new GradientColorKey[] { new(Color.white, 0.0f), new(Color.white, 1.0f) },
+                new GradientAlphaKey[] { new(1.0f, 0.0f), new(0.0f, 1.0f) }
+            );
+            m_LineRenderer.colorGradient = gradient;
+        }
 
         Wind windComponent = GameManager.GetWindComponent();
         if (windComponent != null)
@@ -61,12 +77,18 @@ public class AmmoProjectile : MonoBehaviour
 
     void Fire()
     {
+        StatsManager.IncrementValue(m_GunType == GunType.Rifle ? StatID.SuccessfulHits_Rifle : StatID.SuccessfulHits_Revolver, 1f);
+
         Utils.SetIsKinematic(m_Rigidbody, false);
         transform.parent = null;
 
         m_Rigidbody.velocity = Vector3.zero;
         m_Rigidbody.mass = 0.02f;
         m_Rigidbody.drag = 0.1f;
+        m_Rigidbody.angularDrag = 0.1f;
+
+        m_LineRenderer.startColor = new Color(1f, 1f, 1f, 0f);
+        m_LineRenderer.endColor = Color.white * 0.7f;
 
         Vector3 initialForce = transform.forward * (m_GunExtension.m_MuzzleVelocity * m_ScaleMultiplier) + m_WindEffect;
         m_Rigidbody.AddForce(initialForce, ForceMode.VelocityChange);
@@ -76,7 +98,10 @@ public class AmmoProjectile : MonoBehaviour
     {
         m_Rigidbody = GetComponent<Rigidbody>();
         m_AmmoItem = GetComponent<AmmoItem>();
-        m_GunExtension = GameManager.GetPlayerManagerComponent().m_ItemInHands.GetComponent<GunExtension>();
+        if (GameManager.GetPlayerManagerComponent().m_ItemInHands != null)
+        {
+            m_GunExtension = GameManager.GetPlayerManagerComponent().m_ItemInHands.GetComponent<GunExtension>();
+        }
 
         ConfigureComponents();
     }
@@ -111,8 +136,18 @@ public class AmmoProjectile : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         TryInflictDamage(collision.gameObject, collision.gameObject.name);
+
         ProjectileUtilities.SpawnImpactEffects(collision, transform);
-        Destroy(gameObject);
+        Transform childTransform = transform.Find("DecalRenderer");
+        Renderer renderer = childTransform.GetComponent<Renderer>();
+        if (renderer != null && renderer.enabled)
+        {
+            vp_DecalManager.Add(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     internal static GameObject SpawnAndFire(GameObject prefab, Vector3 startPos, Quaternion startRot)
@@ -128,9 +163,9 @@ public class AmmoProjectile : MonoBehaviour
     {
         if (m_LineRenderer != null)
         {
-            trajectoryPoints.Add(transform.position);
-            m_LineRenderer.positionCount = trajectoryPoints.Count;
-            m_LineRenderer.SetPositions(trajectoryPoints.ToArray());
+            m_TrajectoryPoints.Add(transform.position);
+            m_LineRenderer.positionCount = m_TrajectoryPoints.Count;
+            m_LineRenderer.SetPositions(m_TrajectoryPoints.ToArray());
         }
 
         m_Rigidbody.AddForce(m_WindEffect * Time.deltaTime, ForceMode.Acceleration);

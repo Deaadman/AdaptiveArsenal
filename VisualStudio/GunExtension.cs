@@ -3,8 +3,7 @@
 [RegisterTypeInIl2Cpp]
 public class GunExtension : MonoBehaviour
 {
-    internal int m_MuzzleVelocity;
-    private static readonly Dictionary<string, int> GunMuzzleVelocities = new()
+    static readonly Dictionary<string, int> GunMuzzleVelocities = new()
     {
         {"GEAR_Rifle_Barbs", 744},
         {"GEAR_Rifle_Curators", 991},
@@ -15,6 +14,8 @@ public class GunExtension : MonoBehaviour
         {"GEAR_RevolverStubNosed", 275},
         {"GEAR_Revolver", 411}
     };
+
+    internal int m_MuzzleVelocity;
 
     void Awake()
     {
