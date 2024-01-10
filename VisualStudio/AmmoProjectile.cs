@@ -114,21 +114,21 @@ public class AmmoProjectile : MonoBehaviour
         LocalizedDamage localizedDamage = victim.GetComponent<LocalizedDamage>();
         WeaponSource weaponSource = m_GunType.ToWeaponSource();
         float bleedOutMinutes = localizedDamage.GetBleedOutMinutes(weaponSource);
-        float damageScale = m_Damage * localizedDamage.GetDamageScale(weaponSource);
+        float damageScaleFactor = localizedDamage.GetDamageScale(weaponSource);
+        float damage = m_Damage * damageScaleFactor;
 
-        if (!baseAi.m_IgnoreCriticalHits && localizedDamage.RollChanceToKill(WeaponSource.Rifle)) damageScale = float.PositiveInfinity;
+        if (!baseAi.m_IgnoreCriticalHits && localizedDamage.RollChanceToKill(WeaponSource.Rifle)) damage = float.PositiveInfinity;
 
         if (baseAi.GetAiMode() != AiMode.Dead)
         {
-            if (m_GunType == GunType.Rifle || m_GunType == GunType.Revolver)
-            {
-                StatsManager.IncrementValue(m_GunType == GunType.Rifle ? StatID.SuccessfulHits_Rifle : StatID.SuccessfulHits_Revolver, 1f);
-                GameManager.GetSkillsManager().IncrementPointsAndNotify(m_GunType == GunType.Rifle ? SkillType.Rifle : SkillType.Revolver, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox);
-            }
+            StatID statId = m_GunType == GunType.Rifle ? StatID.SuccessfulHits_Rifle : StatID.SuccessfulHits_Revolver;
+            SkillType skillType = m_GunType == GunType.Rifle ? SkillType.Rifle : SkillType.Revolver;
+            StatsManager.IncrementValue(statId, 1f);
+            GameManager.GetSkillsManager().IncrementPointsAndNotify(skillType, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox);
         }
 
         baseAi.SetupDamageForAnim(transform.position, GameManager.GetPlayerTransform().position, localizedDamage);
-        baseAi.ApplyDamage(damageScale, bleedOutMinutes, DamageSource.Player, collider);
+        baseAi.ApplyDamage(damage, bleedOutMinutes, DamageSource.Player, collider);
 
         return baseAi;
     }
@@ -138,16 +138,17 @@ public class AmmoProjectile : MonoBehaviour
         TryInflictDamage(collision.gameObject, collision.gameObject.name);
 
         ProjectileUtilities.SpawnImpactEffects(collision, transform);
-        Transform childTransform = transform.Find("DecalRenderer");
-        Renderer renderer = childTransform.GetComponent<Renderer>();
-        if (renderer != null && renderer.enabled)
-        {
-            vp_DecalManager.Add(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        //Transform childTransform = transform.Find("DecalRenderer");
+        //Renderer renderer = childTransform.GetComponent<Renderer>();
+        //if (renderer != null && renderer.enabled)
+        //{
+        //    vp_DecalManager.Add(gameObject);
+        //}
+        //else
+        //{
+        //    Destroy(gameObject);
+        //}
+        Destroy(gameObject);
     }
 
     internal static GameObject SpawnAndFire(GameObject prefab, Vector3 startPos, Quaternion startRot)
