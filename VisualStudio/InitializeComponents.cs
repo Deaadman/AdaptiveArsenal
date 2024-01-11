@@ -1,6 +1,6 @@
 ﻿using UnityEngine.AddressableAssets;
 
-namespace ExtendedWeaponry;
+namespace AdaptiveArsenal;
 
 class InitializeComponents
 {

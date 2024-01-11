@@ -1,7 +1,7 @@
-﻿using ExtendedWeaponry.Utilities;
+﻿using AdaptiveArsenal.Utilities;
 using Il2CppTLD.Stats;
 
-namespace ExtendedWeaponry;
+namespace AdaptiveArsenal;
 
 [RegisterTypeInIl2Cpp(false)]
 public class AmmoProjectile : MonoBehaviour
@@ -45,7 +45,7 @@ public class AmmoProjectile : MonoBehaviour
         m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
         m_GunType = m_AmmoItem.m_AmmoForGunType;
 
-        Material? fxArrowTrailMaterial = TextureSwapper.GetLineRendererMaterialFromGearItemPrefab("GEAR_Arrow", "LineRenderer");
+        Material? fxArrowTrailMaterial = MaterialSwapper.GetLineRendererMaterialFromGearItemPrefab("GEAR_Arrow", "LineRenderer");
         if (fxArrowTrailMaterial != null)
         {
             GameObject lineRendererObject = new("LineRenderer");
@@ -136,18 +136,7 @@ public class AmmoProjectile : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         TryInflictDamage(collision.gameObject, collision.gameObject.name);
-
-        ProjectileUtilities.SpawnImpactEffects(collision, transform);
-        //Transform childTransform = transform.Find("DecalRenderer");
-        //Renderer renderer = childTransform.GetComponent<Renderer>();
-        //if (renderer != null && renderer.enabled)
-        //{
-        //    vp_DecalManager.Add(gameObject);
-        //}
-        //else
-        //{
-        //    Destroy(gameObject);
-        //}
+        SpawnImpactEffects(collision, transform);
         Destroy(gameObject);
     }
 
@@ -160,6 +149,35 @@ public class AmmoProjectile : MonoBehaviour
         return gameObject;
     }
 
+    static void SpawnImpactEffects(Collision collision, Transform transform)
+    {
+        ContactPoint contact = collision.contacts[0];
+
+        string materialTagForObjectAtPosition = Utils.GetMaterialTagForObjectAtPosition(contact.otherCollider.gameObject, contact.point);
+        BulletImpactEffectType impactEffectTypeBasedOnMaterial = vp_Bullet.GetImpactEffectTypeBasedOnMaterial(materialTagForObjectAtPosition);
+        BulletImpactEffectPool bulletImpactEffectPool = GameManager.GetEffectPoolManager().GetBulletImpactEffectPool();
+
+        if (impactEffectTypeBasedOnMaterial == BulletImpactEffectType.BulletImpactEffect_Untagged)
+        {
+            bulletImpactEffectPool.SpawnUntilParticlesDone(BulletImpactEffectType.BulletImpactEffect_Stone, transform.position, transform.rotation);
+        }
+        else
+        {
+            bulletImpactEffectPool.SpawnUntilParticlesDone(impactEffectTypeBasedOnMaterial, transform.position, transform.rotation);
+        }
+
+        MaterialEffectType materialEffectType = ImpactDecals.MapBulletImpactEffectTypeToMaterialEffectType(impactEffectTypeBasedOnMaterial);
+        GameManager.GetDynamicDecalsManager().AddImpactDecal(ProjectileType.Bullet, materialEffectType, contact.point, transform.forward);
+
+        if (contact.otherCollider && contact.otherCollider.gameObject)
+        {
+            GameAudioManager.SetMaterialSwitch(materialTagForObjectAtPosition, contact.otherCollider.gameObject);
+            GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(contact.otherCollider.gameObject);
+            AkSoundEngine.PostEvent("Play_BulletImpacts", soundEmitterFromGameObject);
+            GameAudioManager.SetAudioSourceTransform(contact.otherCollider.gameObject, contact.otherCollider.gameObject.transform);
+        }
+    }
+
     void Update()
     {
         if (m_LineRenderer != null)
@@ -168,7 +186,6 @@ public class AmmoProjectile : MonoBehaviour
             m_LineRenderer.positionCount = m_TrajectoryPoints.Count;
             m_LineRenderer.SetPositions(m_TrajectoryPoints.ToArray());
         }
-
         m_Rigidbody.AddForce(m_WindEffect * Time.deltaTime, ForceMode.Acceleration);
     }
 }

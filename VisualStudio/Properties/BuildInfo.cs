@@ -1,10 +1,10 @@
-﻿namespace ExtendedWeaponry.Properties;
+﻿namespace AdaptiveArsenal.Properties;
 
 internal static class BuildInfo
 {
     #region Mandatory
     /// <summary>The machine readable name of the mod (no special characters or spaces)</summary>
-    public const string Name                            = "ExtendedWeaponry";
+    public const string Name                            = "AdaptiveArsenal";
     /// <summary>Who made the mod</summary>
     public const string Author                          = "Deadman";
     /// <summary>Current version (e.g. 1.0.0, 1.0.0-alpha, 1.0.0-beta, 1.0.0-rc, etc.) </summary>
@@ -30,7 +30,7 @@ internal static class BuildInfo
     /// <summary>Trademark info</summary>
     public const string Trademark                       = null;
     /// <summary>Product Name (Generally use the Name)</summary>
-    public const string Product                         = "ExtendedWeaponry";
+    public const string Product                         = "AdaptiveArsenal";
     /// <summary>Culture info</summary>
     public const string Culture                         = null;
     /// <summary>Priority of your mod. Most of the time you should not need to change this</summary>

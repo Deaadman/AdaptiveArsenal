@@ -1,4 +1,4 @@
-﻿namespace ExtendedWeaponry;
+﻿namespace AdaptiveArsenal;
 
 [RegisterTypeInIl2Cpp]
 public class GunExtension : MonoBehaviour

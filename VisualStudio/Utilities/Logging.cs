@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ExtendedWeaponry.Utilities;
+namespace AdaptiveArsenal.Utilities;
 
 internal class Logging
 {

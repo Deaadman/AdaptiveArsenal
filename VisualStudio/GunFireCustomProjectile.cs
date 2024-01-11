@@ -1,4 +1,4 @@
-﻿namespace ExtendedWeaponry;
+﻿namespace AdaptiveArsenal;
 
 class GunFireCustomProjectile
 {

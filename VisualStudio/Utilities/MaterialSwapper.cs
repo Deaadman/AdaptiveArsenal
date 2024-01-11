@@ -1,6 +1,6 @@
-﻿namespace ExtendedWeaponry.Utilities;
+﻿namespace AdaptiveArsenal.Utilities;
 
-internal class TextureSwapper
+internal class MaterialSwapper
 {
     internal static Material? GetLineRendererMaterialFromGearItemPrefab(string gearItemName, string childName)
     {
