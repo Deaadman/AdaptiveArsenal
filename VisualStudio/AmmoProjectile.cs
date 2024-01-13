@@ -15,30 +15,54 @@ public class AmmoProjectile : MonoBehaviour
     private Rigidbody m_Rigidbody;
 #nullable enable
     #endregion
-
     #region Adjustable Values
     /// <summary>
-    /// A float which multiplies against the muzzle velocity for guns.
+    /// Multiplier for the gun's muzzle velocity, affecting projectile speed.
     /// </summary>
     private readonly float m_ScaleMultiplier = 0.15f;
 
     /// <summary>
-    /// A float which determines how affective the wind is against the projectiles.
+    /// Multiplier for the effect of wind on the projectile's trajectory.
     /// </summary>
-    private readonly float m_WindEffectMultiplier = 1;
+    private readonly float m_WindEffectMultiplier = 1f;
 
     /// <summary>
-    /// The damage of the weapon (All weapons are 100 by default).
+    /// Base damage dealt by the weapon, defaulting to 100 for all weapons.
     /// </summary>
-    private readonly float m_Damage = 100;
-    #endregion
+    private readonly float m_Damage = 100f;
 
+    /// <summary>
+    /// Minimum damage dealt by the weapon at or beyond its maximum range.
+    /// </summary>
+    private readonly float m_MinDamage = 20f;
+    #endregion
     #region Other
     private readonly List<Vector3> m_TrajectoryPoints = [];
     private Vector3 m_WindEffect;
+    private Vector3 m_InitialPosition;
     #endregion
 
     void Awake() => InitializeComponents();
+
+    float CalculateDamageByDistance(float distance)
+    {
+        float effectiveRange = m_GunExtension.m_GunStats.m_EffectiveRange;
+        float maxRange = m_GunExtension.m_GunStats.m_MaxRange;
+
+        if (distance <= effectiveRange)
+        {
+            return m_Damage;
+        }
+        else if (distance > maxRange)
+        {
+            return m_MinDamage;
+        }
+        else
+        {
+            float normalizedDistance = (distance - effectiveRange) / (maxRange - effectiveRange);
+            return Mathf.Lerp(m_Damage, m_MinDamage, normalizedDistance);
+        }
+    }
 
     void ConfigureComponents()
     {
@@ -91,8 +115,10 @@ public class AmmoProjectile : MonoBehaviour
         m_LineRenderer.startColor = new Color(1f, 1f, 1f, 0f);
         m_LineRenderer.endColor = Color.white * 0.7f;
 
-        Vector3 initialForce = transform.forward * (m_GunExtension.m_MuzzleVelocity * m_ScaleMultiplier) + m_WindEffect;
+        Vector3 initialForce = transform.forward * (m_GunExtension.m_GunStats.m_MuzzleVelocity * m_ScaleMultiplier) + m_WindEffect;
         m_Rigidbody.AddForce(initialForce, ForceMode.VelocityChange);
+
+        m_InitialPosition = transform.position;
     }
 
     void InitializeComponents()
@@ -117,9 +143,16 @@ public class AmmoProjectile : MonoBehaviour
         baseAi.MaybeFleeOrAttackFromProjectileHit(weaponSource);
         float bleedOutMinutes = localizedDamage.GetBleedOutMinutes(weaponSource);
         float damageScaleFactor = localizedDamage.GetDamageScale(weaponSource);
-        float damage = m_Damage * damageScaleFactor;
 
-        if (!baseAi.m_IgnoreCriticalHits && localizedDamage.RollChanceToKill(WeaponSource.Rifle)) damage = float.PositiveInfinity;
+        float distance = Vector3.Distance(m_InitialPosition, transform.position);
+        float distanceBasedDamage = CalculateDamageByDistance(distance);
+
+        float damage = distanceBasedDamage * damageScaleFactor;
+
+        if (!baseAi.m_IgnoreCriticalHits && localizedDamage.RollChanceToKill(WeaponSource.Rifle))
+        {
+            damage = float.PositiveInfinity;
+        }
 
         if (baseAi.GetAiMode() != AiMode.Dead)
         {
