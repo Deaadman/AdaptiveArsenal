@@ -7,14 +7,14 @@ internal static class BuildInfo
     public const string Name                            = "AdaptiveArsenal";
     /// <summary>Who made the mod</summary>
     public const string Author                          = "Deadman";
-    /// <summary>Current version (e.g. 1.0.0, 1.0.0-alpha, 1.0.0-beta, 1.0.0-rc, etc.) </summary>
-    public const string Version                         = "1.0.0-DeveloperBuild";
+    /// <summary>Current version (e.g. 1.0.0, 1.0.0-Alpha, 1.0.0-Beta, 1.0.0-RC, etc.) </summary>
+    public const string Version                         = "1.0.0-RC.1";
     /// <summary>Version shown in DnSpy</summary>
     public const string AssemblyVersion                 = "1.0.0.0";
     /// <summary>Name used on GUI's, like ModSettings</summary>
-    public const string GUIName                         = "Extended Weaponry";
+    public const string GUIName                         = "Adaptive Arsenal";
     /// <summary>The minimum Melon Loader version that your mod requires.</summary>
-    public const string MelonLoaderVersion              = "0.6.1";
+    public const string MelonLoaderVersion              = "0.6.2";
     #endregion
 
     #region Optional

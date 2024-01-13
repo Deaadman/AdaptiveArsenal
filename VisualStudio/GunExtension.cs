@@ -1,6 +1,6 @@
 ﻿namespace AdaptiveArsenal;
 
-[RegisterTypeInIl2Cpp]
+[RegisterTypeInIl2Cpp(false)]
 public class GunExtension : MonoBehaviour
 {
     static readonly Dictionary<string, int> GunMuzzleVelocities = new()

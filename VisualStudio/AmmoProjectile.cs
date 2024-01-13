@@ -53,7 +53,8 @@ public class AmmoProjectile : MonoBehaviour
 
             m_LineRenderer = lineRendererObject.AddComponent<LineRenderer>();
             m_LineRenderer.material = fxArrowTrailMaterial;
-            m_LineRenderer.startWidth = m_LineRenderer.endWidth = 0.1f;
+            m_LineRenderer.startWidth = 0.5f;
+            m_LineRenderer.endWidth = 0.1f;
 
             Gradient gradient = new();
             gradient.SetKeys(
@@ -113,6 +114,7 @@ public class AmmoProjectile : MonoBehaviour
 
         LocalizedDamage localizedDamage = victim.GetComponent<LocalizedDamage>();
         WeaponSource weaponSource = m_GunType.ToWeaponSource();
+        baseAi.MaybeFleeOrAttackFromProjectileHit(weaponSource);
         float bleedOutMinutes = localizedDamage.GetBleedOutMinutes(weaponSource);
         float damageScaleFactor = localizedDamage.GetDamageScale(weaponSource);
         float damage = m_Damage * damageScaleFactor;
