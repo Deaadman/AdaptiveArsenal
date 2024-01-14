@@ -186,9 +186,7 @@ public class AmmoProjectile : MonoBehaviour
 
     static void SpawnImpactEffects(Collision collision, Transform transform)
     {
-        ContactPoint contact = collision.contacts[0];
-
-        string materialTagForObjectAtPosition = Utils.GetMaterialTagForObjectAtPosition(contact.otherCollider.gameObject, contact.point);
+        string materialTagForObjectAtPosition = Utils.GetMaterialTagForObjectAtPosition(collision.collider.gameObject, collision.gameObject.transform.position);
         BulletImpactEffectType impactEffectTypeBasedOnMaterial = vp_Bullet.GetImpactEffectTypeBasedOnMaterial(materialTagForObjectAtPosition);
         BulletImpactEffectPool bulletImpactEffectPool = GameManager.GetEffectPoolManager().GetBulletImpactEffectPool();
 
@@ -202,14 +200,14 @@ public class AmmoProjectile : MonoBehaviour
         }
 
         MaterialEffectType materialEffectType = ImpactDecals.MapBulletImpactEffectTypeToMaterialEffectType(impactEffectTypeBasedOnMaterial);
-        GameManager.GetDynamicDecalsManager().AddImpactDecal(ProjectileType.Bullet, materialEffectType, contact.point, transform.forward);
+        GameManager.GetDynamicDecalsManager().AddImpactDecal(ProjectileType.Bullet, materialEffectType, collision.gameObject.transform.position, transform.forward);
 
-        if (contact.otherCollider && contact.otherCollider.gameObject)
+        if (collision.collider && collision.collider.gameObject)
         {
-            GameAudioManager.SetMaterialSwitch(materialTagForObjectAtPosition, contact.otherCollider.gameObject);
-            GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(contact.otherCollider.gameObject);
+            GameAudioManager.SetMaterialSwitch(materialTagForObjectAtPosition, collision.collider.gameObject);
+            GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(collision.collider.gameObject);
             AkSoundEngine.PostEvent("Play_BulletImpacts", soundEmitterFromGameObject);
-            GameAudioManager.SetAudioSourceTransform(contact.otherCollider.gameObject, contact.otherCollider.gameObject.transform);
+            GameAudioManager.SetAudioSourceTransform(collision.collider.gameObject, collision.collider.gameObject.transform);
         }
     }
 
