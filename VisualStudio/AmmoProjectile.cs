@@ -13,6 +13,8 @@ public class AmmoProjectile : MonoBehaviour
     private GunType m_GunType;
     private LineRenderer m_LineRenderer;
     private Rigidbody m_Rigidbody;
+    private int m_RifleSkillLevel;
+    private int m_RevolverSkillLevel;
 #nullable enable
     #endregion
     #region Properties
@@ -110,7 +112,9 @@ public class AmmoProjectile : MonoBehaviour
         if (windComponent != null)
         {
             float windSpeedMetersPerSec = windComponent.m_CurrentMPH * 0.44704f;
-            m_WindEffect = windComponent.m_CurrentDirection.normalized * windSpeedMetersPerSec * m_WindEffectMultiplier;
+            int currentSkillLevel = GetCurrentSkillLevel();
+            float adjustedWindEffectMultiplier = Mathf.Max(1f - 0.1f * currentSkillLevel, 0f);
+            m_WindEffect = windComponent.m_CurrentDirection.normalized * windSpeedMetersPerSec * adjustedWindEffectMultiplier;
         }
         else
         {
@@ -139,6 +143,11 @@ public class AmmoProjectile : MonoBehaviour
         m_InitialPosition = transform.position;
     }
 
+    int GetCurrentSkillLevel()
+    {
+        return m_GunType == GunType.Rifle ? m_RifleSkillLevel : m_RevolverSkillLevel;
+    }
+
     void InitializeComponents()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
@@ -147,6 +156,8 @@ public class AmmoProjectile : MonoBehaviour
         {
             m_GunExtension = GameManager.GetPlayerManagerComponent().m_ItemInHands.GetComponent<GunExtension>();
         }
+        m_RifleSkillLevel = GameManager.GetSkillRifle().GetCurrentTierNumber();
+        m_RevolverSkillLevel = GameManager.GetSkillRevolver().GetCurrentTierNumber();
 
         ConfigureComponents();
     }
