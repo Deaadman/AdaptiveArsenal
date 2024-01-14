@@ -15,7 +15,7 @@ public class AmmoProjectile : MonoBehaviour
     private Rigidbody m_Rigidbody;
 #nullable enable
     #endregion
-    #region Adjustable Values
+    #region Properties
     /// <summary>
     /// Multiplier for the gun's muzzle velocity, affecting projectile speed.
     /// </summary>
@@ -35,6 +35,24 @@ public class AmmoProjectile : MonoBehaviour
     /// Minimum damage dealt by the weapon at or beyond its maximum range.
     /// </summary>
     private readonly float m_MinDamage = 20f;
+    #endregion
+    #region LineRenderer Properties
+    /// <summary>
+    /// The maximum length at which the LineRenderer will render at.
+    /// </summary>
+    private readonly float m_LineRendererMaxLength = 200f;
+
+    /// <summary>
+    /// Will the LineRenderer start to fade out?
+    /// </summary>
+    private bool m_LineRendererStartFadeOut = false;
+
+    /// <summary>
+    /// The duration of how long it'll take for the LineRenderer to fade out in seconds.
+    /// </summary>
+    private readonly float m_LineRendererFadeDuration = 2f;
+
+    private float m_LineRendererFadeTimer = 0f;
     #endregion
     #region Other
     private readonly List<Vector3> m_TrajectoryPoints = [];
@@ -77,7 +95,7 @@ public class AmmoProjectile : MonoBehaviour
 
             m_LineRenderer = lineRendererObject.AddComponent<LineRenderer>();
             m_LineRenderer.material = fxArrowTrailMaterial;
-            m_LineRenderer.startWidth = 0.5f;
+            m_LineRenderer.startWidth = 0.4f;
             m_LineRenderer.endWidth = 0.1f;
 
             Gradient gradient = new();
@@ -172,7 +190,14 @@ public class AmmoProjectile : MonoBehaviour
     {
         TryInflictDamage(collision.gameObject, collision.gameObject.name);
         SpawnImpactEffects(collision, transform);
-        Destroy(gameObject);
+
+        m_Rigidbody.velocity = Vector3.zero;
+        m_Rigidbody.isKinematic = true;
+
+        m_LineRendererStartFadeOut = true;
+        m_LineRendererFadeTimer = 0f;
+
+        Destroy(gameObject, m_LineRendererFadeDuration);
     }
 
     internal static GameObject SpawnAndFire(GameObject prefab, Vector3 startPos, Quaternion startRot)
@@ -213,12 +238,46 @@ public class AmmoProjectile : MonoBehaviour
 
     void Update()
     {
+        UpdateLineRenderer();
+        m_Rigidbody.AddForce(m_WindEffect * Time.deltaTime, ForceMode.Acceleration);
+    }
+
+    void UpdateLineRenderer()
+    {
         if (m_LineRenderer != null)
         {
-            m_TrajectoryPoints.Add(transform.position);
-            m_LineRenderer.positionCount = m_TrajectoryPoints.Count;
-            m_LineRenderer.SetPositions(m_TrajectoryPoints.ToArray());
+            if (!m_LineRendererStartFadeOut)
+            {
+                m_TrajectoryPoints.Add(transform.position);
+
+                float totalLength = 0f;
+                for (int i = 0; i < m_TrajectoryPoints.Count - 1; i++)
+                {
+                    totalLength += Vector3.Distance(m_TrajectoryPoints[i], m_TrajectoryPoints[i + 1]);
+                    if (totalLength > m_LineRendererMaxLength)
+                    {
+                        m_TrajectoryPoints.RemoveAt(0);
+                        break;
+                    }
+                }
+
+                m_LineRenderer.positionCount = m_TrajectoryPoints.Count;
+                m_LineRenderer.SetPositions(m_TrajectoryPoints.ToArray());
+            }
+            else
+            {
+                m_LineRendererFadeTimer += Time.deltaTime;
+                float alpha = Mathf.Clamp01(1.0f - (m_LineRendererFadeTimer / m_LineRendererFadeDuration));
+                Color startColor = m_LineRenderer.startColor;
+                Color endColor = m_LineRenderer.endColor;
+                m_LineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, alpha * startColor.a);
+                m_LineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, alpha * endColor.a);
+
+                if (m_LineRendererFadeTimer >= m_LineRendererFadeDuration)
+                {
+                    Destroy(m_LineRenderer);
+                }
+            }
         }
-        m_Rigidbody.AddForce(m_WindEffect * Time.deltaTime, ForceMode.Acceleration);
     }
 }
