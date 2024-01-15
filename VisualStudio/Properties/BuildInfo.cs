@@ -8,7 +8,7 @@ internal static class BuildInfo
     /// <summary>Who made the mod</summary>
     public const string Author                          = "Deadman";
     /// <summary>Current version (e.g. 1.0.0, 1.0.0-Alpha, 1.0.0-Beta, 1.0.0-RC, etc.) </summary>
-    public const string Version                         = "1.0.0-DeveloperBuild";
+    public const string Version                         = "1.0.0";
     /// <summary>Version shown in DnSpy</summary>
     public const string AssemblyVersion                 = "1.0.0.0";
     /// <summary>Name used on GUI's, like ModSettings</summary>
@@ -19,7 +19,7 @@ internal static class BuildInfo
 
     #region Optional
     /// <summary>What the mod does</summary>
-    public const string Description                     = null;
+    public const string Description                     = "Adaptive Arsenal is a modification that improves upon existing weapon mechanics within The Long Dark.";
     /// <summary>Company that made it</summary>
     public const string Company                         = null;
     /// <summary>A valid download link</summary>

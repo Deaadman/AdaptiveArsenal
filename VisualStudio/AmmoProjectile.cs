@@ -17,6 +17,7 @@ public class AmmoProjectile : MonoBehaviour
     private int m_RevolverSkillLevel;
 #nullable enable
     #endregion
+
     #region Properties
     /// <summary>
     /// Multiplier for the gun's muzzle velocity, affecting projectile speed.
@@ -38,6 +39,7 @@ public class AmmoProjectile : MonoBehaviour
     /// </summary>
     private readonly float m_MinDamage = 20f;
     #endregion
+
     #region LineRenderer Properties
     /// <summary>
     /// The maximum length at which the LineRenderer will render at.
@@ -56,6 +58,7 @@ public class AmmoProjectile : MonoBehaviour
 
     private float m_LineRendererFadeTimer = 0f;
     #endregion
+
     #region Other
     private readonly List<Vector3> m_TrajectoryPoints = [];
     private Vector3 m_WindEffect;
