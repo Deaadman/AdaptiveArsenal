@@ -22,7 +22,7 @@ public class AmmoProjectile : MonoBehaviour
     /// <summary>
     /// Multiplier for the gun's muzzle velocity, affecting projectile speed.
     /// </summary>
-    private readonly float m_ScaleMultiplier = 0.15f;
+    private readonly float m_ScaleMultiplier = 0.175f;
 
     /// <summary>
     /// Multiplier for the effect of wind on the projectile's trajectory.
