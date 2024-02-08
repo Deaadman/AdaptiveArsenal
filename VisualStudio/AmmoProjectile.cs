@@ -65,7 +65,11 @@ public class AmmoProjectile : MonoBehaviour
     private Vector3 m_InitialPosition;
     #endregion
 
-    void Awake() => InitializeComponents();
+    void Awake()
+    {
+        InitializeComponents();
+        enabled = false;
+    }
 
     float CalculateDamageByDistance(float distance)
     {
@@ -127,6 +131,8 @@ public class AmmoProjectile : MonoBehaviour
 
     void Fire()
     {
+        enabled = true;
+
         StatsManager.IncrementValue(m_GunType == GunType.Rifle ? StatID.SuccessfulHits_Rifle : StatID.SuccessfulHits_Revolver, 1f);
 
         Utils.SetIsKinematic(m_Rigidbody, false);
